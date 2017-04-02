@@ -11,55 +11,94 @@ _start:
                 call            read_long
                 lea             rsi, [rsp + 128 * 8]
                 call            mul_long_long
-		mov 		rdi, rdx
-		xor 		rax, rax
-		mov 		rax, rcx
-		mul		rcx 		
+
                 call            write_long
 
                 mov             al, 0x0a
                 call            write_char
 
                 jmp             exit
+;;
+;
+;
+;
+solve:
+	push	rbx
+	push	rdx
+	push 	rsi
+	push	rcx
+	mov 	rcx, 128
+	call    mul_long_short
+	pop	rcx
+	pop 	rsi
+	pop	rdx
+	pop	rbx
+	push	rsi
+	push	rdi
+	mov	rsi, rdi
+	mov	rdi, rdx
+	push	rax
+	push	rcx
+	mov 	rcx, 128
+	; problem with lenght
+	call 	add_long_long
+	pop	rcx
+	pop	rax
+	pop	rdi
+	pop	rsi
+	push	rdx
+	push	rbx
+	push	rcx
+	mov 	rcx, 128
+	call	div_long_short
+	pop	rcx
+	pop	rbx
+	pop	rdx
+	ret
 ; multiplies two long number
 ;    rdi -- address of summand #1 (long number)
 ;    rsi -- address of summand #2 (long number)
 ;    rcx -- length of long numbers in qwords
-; result : rdx
+; result : rdi
 mul_long_long:
-		push 	rdi
-		push 	rsi
-		push 	rcx
+		push		rdx
+		push		rax
+		push		rsi
+		push		rcx
+		push		rbx
+		push		rdx
+		sub		rsp, 2 * 128 * 128 * 8
+		mov 		rdx, rsp
+		push 		rcx
 		clc
-		mov 	rbx, rcx
-		sub 	rsp, 2 * 128 * 8
-		mov 	rdx, rsp
-		lea 	rsp, [rsp + 2 * 128 * 8]
-		push 	rdx
+		;/// SET ZERO
+		push		rdi
+		mov		rdi, rdx
+		call 		set_zero
+		pop		rdi
+		;///
 .loop1:
-	push 	rcx
-	push 	rdx
-	clc
-	.loop2:
-		mov 		rax, [rsi]
-		lea 		rsi, [rsi + 8]
-; problem is here: don't know how to multiply [rdi] with rax
-;		mul 		[rdi]
-		adc 		rax, [rdx]
-		mov 		[rdx], rax
-		dec 		rcx
-		lea 		rdx, [rdx + 8] 
-		jnz 		.loop2
-
-	pop 	rdx
-	lea 	rdx, [rdx + 8]
-	pop 	rcx
-	dec 	rbx
+	mov 	rbx, [rsi]
+	lea 	rsi, [rsi + 8]
+	mov 	rax, rcx
+	pop	rcx
+	cmp	rbx, 0
+	jz	.metka
+	call 	solve
+		.metka:
+	push	rcx
+	mov 	rcx, rax
+	dec 	rcx
 	jnz	.loop1
-		pop 		rdx
-		pop 		rcx
-		pop 		rsi
-		pop 		rdi
+		pop		rcx
+		mov 		rdi, rdx
+		add		rsp, 2 * 128 * 128 * 8
+		pop		rdx	
+		pop		rbx
+		pop		rcx
+		pop		rsi
+		pop		rax
+		pop		rdx	
 		ret
 		
 ;
@@ -257,7 +296,9 @@ read_long:
 write_long:
                 push            rax
                 push            rcx
-
+		push		rdi
+		push		rdx
+		push		rsi
                 mov             rax, 20
                 mul             rcx
                 mov             rbp, rsp
@@ -279,6 +320,9 @@ write_long:
                 call            print_string
 
                 mov             rsp, rbp
+		pop		rsi
+		pop		rdx
+		pop		rdi
                 pop             rcx
                 pop             rax
                 ret
