@@ -40,7 +40,6 @@ solve:
 	push	rax
 	push	rcx
 	mov 	rcx, 128
-	; problem with lenght
 	call 	add_long_long
 	pop	rcx
 	pop	rax
@@ -69,6 +68,7 @@ mul_long_long:
 		push		rdx
 		sub		rsp, 2 * 128 * 128 * 8
 		mov 		rdx, rsp
+		push		rdx
 		push 		rcx
 		clc
 		;/// SET ZERO
@@ -79,7 +79,6 @@ mul_long_long:
 		;///
 .loop1:
 	mov 	rbx, [rsi]
-	lea 	rsi, [rsi + 8]
 	mov 	rax, rcx
 	pop	rcx
 	cmp	rbx, 0
@@ -88,9 +87,12 @@ mul_long_long:
 		.metka:
 	push	rcx
 	mov 	rcx, rax
+	lea 	rsi, [rsi + 8]
+	lea 	rdx, [rdx + 8]
 	dec 	rcx
 	jnz	.loop1
 		pop		rcx
+		pop		rdx
 		mov 		rdi, rdx
 		add		rsp, 2 * 128 * 128 * 8
 		pop		rdx	
