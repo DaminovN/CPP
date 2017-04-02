@@ -9,3 +9,4 @@ enable_language(ASM)
 
 add_executable(hello hello.asm)
 add_executable(add add.asm)
+add_executable(mul mul.asm)

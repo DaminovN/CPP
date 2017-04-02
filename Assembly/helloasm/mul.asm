@@ -10,7 +10,7 @@ _start:
                 mov             rdi, rsp
                 call            read_long
                 lea             rsi, [rsp + 128 * 8]
-                call            add_long_long
+                call            mul_long_long
 
                 call            write_long
 
