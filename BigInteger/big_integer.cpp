@@ -1,4 +1,7 @@
-#include<bits/stdc++.h>
+//#include<bits/stdc++.h>
+#include <cstring>
+#include <stdexcept>
+#include <iostream>
 #include "big_integer.h"
 using namespace std;
 
@@ -15,19 +18,19 @@ big_integer::big_integer(big_integer const& value) : v(value.v), sign(value.sign
 
 big_integer::big_integer(big_integer const& value, int sign): v(value.v), sign(sign) {}
 
-big_integer::big_integer(int value)
+big_integer::big_integer(int val)
 {
-	if (value >= 0)
+	if (val >= 0)
 		sign = 1;
 	else
 		sign = -1;
-	value = abs(value);
+	uint64_t value = abs((long long) val);
 	v.clear();
 	if (value == 0)
 		v.push_back(0);
 	while (value > 0)
 	{
-		v.push_back(value % BASE);
+		v.push_back((value) % BASE);
 		value /= BASE;
 	}
 }
@@ -46,13 +49,13 @@ void normalize(vector<uint32_t> &val)
 		val.pop_back();
 	}
 }
-void shortDivMod(int const& divider, const vector<uint32_t> a, vector<uint32_t>& res, uint32_t& mod)
+void shortDivMod(uint64_t dividendBase, uint64_t const& divider, const vector<uint32_t> a, vector<uint32_t>& res, uint32_t& mod)
 {
 	uint64_t cur = 0;
 	res.resize(a.size(), 0);
 	for (int i = a.size() - 1; i >= 0; --i)
 	{
-		cur = cur * BASE + a[i];
+		cur = cur * dividendBase + a[i];
 		res[i] = cur / divider;
 		cur %= divider;
 	}
@@ -74,10 +77,12 @@ big_integer::big_integer(string const& value)
 	uint32_t mod = 0;
 	while(temp.size() != 1 || temp[0] != 0)
 	{
-		shortDivMod(10, temp, temp, mod);
+		shortDivMod(10, BASE, temp, temp, mod);
 		v.push_back(mod);
 	}
 	normalize(v);
+	if (v.size() == 1 && v[0] == 0)
+		sign = 1;
 }
 big_integer::~big_integer() {}
 
@@ -86,13 +91,13 @@ big_integer big_integer::operator+() const
 {
 	return *this;
 }
-big_integer big_integer::operator-() const
-{
-	return big_integer(*this, -sign);
-}
-
 big_integer ZERO(0);
 big_integer ONE(1);
+big_integer big_integer::operator-() const
+{
+	return (*this != ZERO) ? big_integer(*this, -sign) : ZERO;
+}
+
 
 big_integer big_integer::operator~() const
 {
@@ -101,24 +106,15 @@ big_integer big_integer::operator~() const
 
 vector<uint32_t> to_byte(vector<uint32_t> v, int sign)
 {
-	// cout << v.size() << " " << v[0] << endl;
 	if (sign < 0)
 	{
-		// cout << (~big_integer(v, 1)).v.size() << " " << (~big_integer(v, 1)).v[0] << endl;
-		// print(~(big_integer(v, 1)));
-		// print(ONE);
-		// print((~(big_integer(v, 1))) + ONE);
 		v = ((~big_integer(v, 1)) + ONE).v;
 	}
 	v.push_back((sign >= 0) ? 0 : NEEDBIT);
-	// cout << "HERE\n";
-	// cout << v.size() << " " << v[0] << " " << v[1] << endl;
-	// cout << "HERE\n";
 	return v;
 }
 big_integer from_byte(vector<uint32_t> v)
 {
-	// cout << "->  " << v.size() << " " << v[0] << " " << v[1] << endl;
 	int sign = 1;
 	if (v.back() == NEEDBIT)
 		sign = -1;
@@ -149,14 +145,21 @@ big_integer leftShift(const vector<uint32_t>& a, int shift)
     uint64_t cur = 0;
     uint32_t last = a.back();
     shift %= BASEPOW;
+    // cout << a.size() << endl;
+    // for (int i = 0; i < a.size(); ++i)
+    // {
+    // 	cout << a[i] << " ";
+    // }
+    // cout << "DONE\n";
     for (size_t i = 0; i < a.size(); ++i)
     {
         cur += ((uint64_t) a[i]) << shift;
         res.push_back(cur & NEEDBIT);
         cur >>= BASEPOW;
     }
-
     res.push_back(last);
+    while (res.size() > 1 && res.back() == res[res.size() - 2])
+    	res.pop_back();
     return from_byte(res);
 }
 big_integer rightShift(const vector<uint32_t>& a, int shift)
@@ -184,7 +187,7 @@ void print(big_integer value)
 	string res = "";
 	while (value.size() != 1 || value[0] != 0)
 	{
-		shortDivMod(10, value.v, value.v, mod);
+		shortDivMod(BASE, 10, value.v, value.v, mod);
 		res += (char) (mod + 48);
 	}
 	if (res == "")
@@ -241,12 +244,13 @@ void multiply(vector<uint32_t> &res, const vector<uint32_t> a, const vector<uint
 {
 	res.resize(a.size() + b.size() + 1);
 	fill(res.begin(), res.end(), 0);
-	uint64_t carry = 0;
+    uint64_t carry;
 	vector<uint64_t> resTemp;
 	resTemp.resize(a.size() + b.size() + 1);
 	for (size_t i = 0; i < a.size(); ++i)
 	{
-		for (size_t j = 0, carry = 0; j < b.size(); ++j)
+        carry = 0;
+        for (size_t j = 0; j < b.size(); ++j)
 		{
 			uint64_t cur = resTemp[i + j] + a[i] * 1ull* b[j];
 			resTemp[i + j] = cur % BASE;
@@ -270,7 +274,7 @@ void longDiv(vector<uint32_t>& res, const vector<uint32_t> a, const vector<uint3
 	else if (b.size() == 1)
 	{
 		uint32_t nth = 0;
-		shortDivMod(b[0], a, res, nth); 
+		shortDivMod(BASE, b[0], a, res, nth); 
 		return;
 	}
 	vector<uint32_t> temp, val;
@@ -297,26 +301,37 @@ void longDiv(vector<uint32_t>& res, const vector<uint32_t> a, const vector<uint3
 	} 
 	normalize(res);
 }
-int comp(big_integer const& a, big_integer const& b)
+int comp(big_integer const& a, big_integer const& b, bool absCompare)
 {
-	if (a.sign != b.sign)
+	// cout << absCompare << " HERE\n";
+	// cout << a.sign << " " << b.sign << endl;
+	// cout << absCompare << " " << a.sign << " " << b.sign << endl;
+	// cout << a.size() << " " << b.size() << endl;
+	if (!absCompare && a.sign != b.sign)
 		return (a.sign > b.sign ? 1 : -1);
 	if (a.size() != b.size())
 	{
-		if (a.size() > b.size() && a.sign == 1)
+		if (a.size() > b.size() && a.sign == 1 && !absCompare)
 			return 1;
-		if (a.size() < b.size() && a.sign == -1)
+		if (a.size() < b.size() && a.sign == -1 && !absCompare)
 			return 1;
+		if (absCompare)
+		{
+			if (a.size() > b.size())
+				return 1;
+		}
 		return -1;
 	}
 	for (int i = a.size() - 1; i >= 0; --i)
 	{
 		if (a[i] == b[i])
 			continue;
-		if (a[i] > b[i] && a.sign == 1)
+		if (!absCompare && a[i] > b[i] && a.sign == 1)
 			return 1;
-		if (a[i] < b[i] && a.sign == -1)
+		if (!absCompare && a[i] < b[i] && a.sign == -1)
 			return 1;
+		if (absCompare)
+			return (a[i] > b[i]) ? 1 : -1;
 		return -1;
 	}
 	return 0;
@@ -324,9 +339,7 @@ int comp(big_integer const& a, big_integer const& b)
 
 big_integer& big_integer::operator/=(big_integer const& value)
 {
-	int signOther = (value >= 0);
-	if (signOther < 0)
-		signOther = - signOther;
+	int signOther = value.sign;
 	longDiv(v, v, value.v);
 	sign *= signOther;
 	return *this;
@@ -334,20 +347,21 @@ big_integer& big_integer::operator/=(big_integer const& value)
 
 big_integer& big_integer::operator+=(big_integer const& value)
 {
+	// cout << sign << " " << value.sign << " +=\n";
 	if (sign == value.sign)
 	{
 		add(v, v, value.v);
 	}
 	else
 	{
-		int res = comp(*this, value);
+		int res = comp(*this, value, true);
 		if (res == 1)
 			subtract(v, v, value.v);
-		else if (res == -1)
-			subtract(v, value.v, v);
 		else
-			*this = ZERO;
+			subtract(v, value.v, v), sign = value.sign;
 	}
+	if (v.size() == 1 && v[0] == 0)
+		sign = 1;
 	return *this;
 }
 
@@ -451,6 +465,10 @@ big_integer operator/(big_integer a, big_integer const& b)
 {
 	return a /= b;
 }
+big_integer operator%(big_integer a, big_integer const& b)
+{
+    return a %= b;
+}
 big_integer operator&(big_integer a, big_integer const& b)
 {
     return a &= b;
@@ -480,7 +498,8 @@ string to_string(big_integer const& a)
 	uint32_t mod;
 	while(!(v.size() == 1 && v[0] == 0))
 	{
-		shortDivMod(10, v, v, mod);
+		// cout << "BEFORE " << v.size() << " " << v[0] << endl;
+		shortDivMod(BASE, 10, v, v, mod);
 		res += (char) (mod + 48);
 	}
 	if (a.sign == -1)
@@ -490,7 +509,17 @@ string to_string(big_integer const& a)
 	reverse(res.begin(), res.end());
 	return (!res.empty()) ? res : "0";
 }
+std::istream& operator>>(std::istream &s, big_integer &a)
+{
+    std::string d;
+    s >> d;
+    a = big_integer(d);
+    return s;
+}
 int main()
 {
+	big_integer a(1);
+	(a <<= 2) <<= 1;
+	cout << (a == big_integer(8)) << endl;
 	return 0;
 }

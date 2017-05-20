@@ -7,7 +7,7 @@ CMakeFiles/big_integer_testing.dir/big_integer.cpp.o
 CMakeFiles/big_integer_testing.dir/big_integer_testing.cpp.o
  /home/daminovn/Desktop/CPP/cpp-course/Assembly/BigInteger/big_integer.h
  /home/daminovn/Desktop/CPP/cpp-course/Assembly/BigInteger/big_integer_testing.cpp
- gtest/gtest.h
+ /home/daminovn/Desktop/CPP/cpp-course/Assembly/BigInteger/gtest/gtest.h
 CMakeFiles/big_integer_testing.dir/gtest/gtest-all.cc.o
  /home/daminovn/Desktop/CPP/cpp-course/Assembly/BigInteger/gtest/gtest-all.cc
  gtest/gtest.h

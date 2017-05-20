@@ -1,5 +1,13 @@
 #ifndef BIG_INTEGER_H
 #define BIG_INTEGER_H
+
+#include <vector>
+#include<string>
+#include<algorithm>
+#include<stdint.h>
+#include <cstddef>
+#include <iosfwd>
+
 struct big_integer
 {
 	big_integer();
@@ -27,10 +35,10 @@ struct big_integer
 	big_integer& operator<<=(int const& value);
 	big_integer& operator>>=(int const& value);
 
-	friend big_integer operator+(big_integer a, big_integer const& b);
+    /*friend big_integer operator+(big_integer a, big_integer const& b);
 	friend big_integer operator-(big_integer a, big_integer const& b);
 	friend big_integer operator*(big_integer a, big_integer const& b);
-	friend big_integer operator/(big_integer a, big_integer const& b);
+    friend big_integer operator/(big_integer a, big_integer const& b);*/
 
 	big_integer& operator++();
 	big_integer operator++(int);
@@ -46,12 +54,12 @@ struct big_integer
 
 	friend std::string to_string(big_integer const& a);
 
-	friend void print(big_integer value);
+    friend void print(big_integer value);
 
 private:
 	std::vector<uint32_t> v;
 	int sign;
-	friend int comp(big_integer const& a, big_integer const& b);
+	friend int comp(big_integer const& a, big_integer const& b, bool absCompare = false);
 	friend std::vector<uint32_t> to_byte(std::vector<uint32_t> v, int sign);
 	friend big_integer leftShift(big_integer const& val, int shift);
 	friend big_integer rightShift(big_integer const& val, int shift);
