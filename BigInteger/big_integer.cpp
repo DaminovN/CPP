@@ -307,6 +307,8 @@ void longDiv(vector<int>& res, const vector<int> a, const vector<int>& b)
     vector<int> temp, val;
     res.resize(a.size() - b.size() + 2);
     fill(res.begin(), res.end(), 0);
+//    int it = res.size() - 1;
+    bool flag = false;
     for (int i = (int) a.size() - 1; i >= 0; --i)
     {
         val.insert(val.begin(), a[i]);
@@ -320,6 +322,9 @@ void longDiv(vector<int>& res, const vector<int> a, const vector<int>& b)
             else
                 r = m;
         }
+        if (!flag && r - 1 == 0)
+            continue;
+        flag = true;
         res[i] = (int) (r - 1);
         multiply(temp, {res[i]}, b);
         subtract(val, val, temp);
