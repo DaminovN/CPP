@@ -71,7 +71,7 @@ mul_long_long:
 		push		rcx
 		push		rbx
 		push		rdx
-		sub		rsp, 2 * 128 * 128 * 8
+		sub		rsp, 2 * 128 * 8
 		mov 		rdx, rsp
 		push		rdx
 		push 		rcx
@@ -99,7 +99,7 @@ mul_long_long:
 		pop		rcx
 		pop		rdx
 		mov 		rdi, rdx
-		add		rsp, 2 * 128 * 128 * 8
+		add		rsp, 2 * 128 * 8
 		pop		rdx	
 		pop		rbx
 		pop		rcx
