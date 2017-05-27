@@ -10,6 +10,8 @@ _start:
                 mov             rdi, rsp
                 call            read_long
                 lea             rsi, [rsp + 128 * 8]
+                sub             rsp, 2 * 128 * 8
+                mov             rdx, rsp
                 call            mul_long_long
 
                 call            write_long
@@ -23,86 +25,86 @@ _start:
 ;
 ;
 solve:
-	push	rbx
-	push	rdx
-	push 	rsi
-	push	rcx
-	mov 	rcx, 128
-	call    mul_long_short
-	pop	rcx
-	pop 	rsi
-	pop	rdx
-	pop	rbx
-	push	rsi
-	push	rdi
-	mov	rsi, rdi
-	mov	rdi, rdx
-	push	rax
-	push	rcx
-	mov 	rcx, 128
-	call 	add_long_long
-	pop	rcx
-	pop	rax
-	pop	rdi
-	pop	rsi
-	push	rdx
-	push	rbx
-	push	rcx
-	mov 	rcx, 128
-	call	div_long_short
-	pop	rcx
-	pop	rbx
-	pop	rdx
-	ret
+        push    rbx
+        push    rdx
+        push    rsi
+        push    rcx
+        mov     rcx, 128
+        call    mul_long_short
+        pop     rcx
+        pop     rsi
+        pop     rdx
+        pop     rbx
+        push    rsi
+        push    rdi
+        mov     rsi, rdi
+        mov     rdi, rdx
+        push    rax
+        push    rcx
+        mov     rcx, 128
+        call    add_long_long
+        pop     rcx
+        pop     rax
+        pop     rdi
+        pop     rsi
+        push    rdx
+        push    rbx
+        push    rcx
+        mov     rcx, 128
+        call    div_long_short
+        pop     rcx
+        pop     rbx
+        pop     rdx
+        ret
 ; multiplies two long number
 ;    rdi -- address of summand #1 (long number)
 ;    rsi -- address of summand #2 (long number)
 ;    rcx -- length of long numbers in qwords
 ; result : rdi
 mul_long_long:
-		push		rdx
-		push		rax
-		push		rsi
-		push		rcx
-		push		rbx
-		push		rdx
-		sub		rsp, 2 * 128 * 128 * 8
-		mov 		rdx, rsp
-		push		rdx
-		push 		rcx
-		clc
-		;/// SET ZERO
-		push		rdi
-		mov		rdi, rdx
-		call 		set_zero
-		pop		rdi
-		;///
+                push            rdx
+                push            rax
+                push            rsi
+                push            rcx
+                push            rbx
+                push            rdx
+                push            rdx
+                push            rcx
+                clc
+                ;/// SET ZERO
+                push            rdi
+                push            rcx
+                mov             rcx, 2 * 128
+                mov             rdi, rdx
+                call            set_zero
+                pop             rcx
+                pop             rdi
+                ;///
 .loop1:
-	mov 	rbx, [rsi]
-	mov 	rax, rcx
-	pop	rcx
-	cmp	rbx, 0
-	jz	.metka
-	call 	solve
-		.metka:
-	push	rcx
-	mov 	rcx, rax
-	lea 	rsi, [rsi + 8]
-	lea 	rdx, [rdx + 8]
-	dec 	rcx
-	jnz	.loop1
-		pop		rcx
-		pop		rdx
-		mov 		rdi, rdx
-		add		rsp, 2 * 128 * 128 * 8
-		pop		rdx	
-		pop		rbx
-		pop		rcx
-		pop		rsi
-		pop		rax
-		pop		rdx	
-		ret
-		
+        mov     rbx, [rsi]
+        mov     rax, rcx
+        pop     rcx
+        cmp     rbx, 0
+        jz      .metka
+        call    solve
+                .metka:
+        push    rcx
+        mov     rcx, rax
+        lea     rsi, [rsi + 8]
+        lea     rdx, [rdx + 8]
+        dec     rcx
+        jnz     .loop1
+                pop             rcx
+                pop             rdx
+                mov             rdi, rdx
+                pop             rdx     
+                pop             rbx
+                pop             rcx
+                pop             rsi
+                pop             rax
+                pop             rdx     
+                ret
+                
 ;
 ;
 ; adds two long number
@@ -298,9 +300,9 @@ read_long:
 write_long:
                 push            rax
                 push            rcx
-		push		rdi
-		push		rdx
-		push		rsi
+                push            rdi
+                push            rdx
+                push            rsi
                 mov             rax, 20
                 mul             rcx
                 mov             rbp, rsp
@@ -322,9 +324,9 @@ write_long:
                 call            print_string
 
                 mov             rsp, rbp
-		pop		rsi
-		pop		rdx
-		pop		rdi
+                pop             rsi
+                pop             rdx
+                pop             rdi
                 pop             rcx
                 pop             rax
                 ret
