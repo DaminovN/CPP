@@ -10,6 +10,10 @@ const long long int BASE = (1ll << 31ll);
 const int NEEDBIT = (int) (BASE - 1ll);
 const long long int MOD = (1ll << 31ll);
 const int BASEPOW = 31;
+// const long long int BASE = 10;
+// const int NEEDBIT = 9;
+// const long long int MOD = 10ll;
+// const int BASEPOW = 31;
 int nothing;
 
 big_integer::big_integer() : v(1, 0), sign(1) {}
@@ -77,7 +81,7 @@ big_integer::big_integer(string const& value)
     int mod = 0;
     while(temp.size() != 1 || temp[0] != 0)
     {
-        shortDivMod(10, BASE, temp, temp, mod);
+        shortDivMod(10ll, (long long int) BASE, temp, temp, mod);
         v.push_back(mod);
     }
     normalize(v);
@@ -280,7 +284,7 @@ int vec_cmp(vector<int> const &a, vector<int> const &b)
 {
      if (a.size() != b.size())
      {
-         return a.size() - b.size();
+         return (a.size() > b.size()) ? 1 : -1;
      }
      for (int it = (int)a.size() - 1; it >= 0; it--)
      {
@@ -291,7 +295,7 @@ int vec_cmp(vector<int> const &a, vector<int> const &b)
      }
      return 0;
  }
-void longDiv(vector<int>& res, const vector<int> a, const vector<int>& b)
+/*void longDiv(vector<int>& res, const vector<int> a, const vector<int>& b)
 {
     if (a.size() < b.size())
     {
@@ -332,7 +336,76 @@ void longDiv(vector<int>& res, const vector<int> a, const vector<int>& b)
             val.pop_back();
     }
     normalize(res);
+}*/
+int comparePref(const vector<int>& a, int pos, int len, const vector<int>& b)
+{
+    vector<int> cmp;
+    for (int i = pos; len > 0; --len, --i)
+    {
+        cmp.push_back(a[i]);
+    }
+    reverse(cmp.begin(), cmp.end());
+    normalize(cmp);
+    return vec_cmp(cmp, b);
 }
+void subPref(vector<int>& a, int pos, int len, const vector<int>& b)
+{
+    vector<int> cmp;
+    int ln = len;
+    for (int i = pos; len > 0; --len, --i)
+    {
+        cmp.push_back(a[i]);
+    }
+    reverse(cmp.begin(), cmp.end());
+    normalize(cmp);
+    vector<int> res;
+    subtract(res, cmp, b);
+    len = ln;
+    ln = (int) res.size() - 1;
+    int sz = len - (int) res.size();
+    for (int i = pos; len > 0; --len, --i)
+    {
+        a[i] = (len <= res.size()) ? res[ln--] : 0;
+    }
+}
+void longDiv(vector<int>& res, vector<int> a, const vector<int>& b)
+{
+    if (a.size() < b.size())
+    {
+        res = {0};
+        return;
+    }
+    else if (b.size() == 1)
+    {
+        int nth = 0;
+        shortDivMod(BASE, b[0], a, res, nth);
+        return;
+    }
+    res.clear();
+    bool flag = false;
+    __int128 divident = 0, divisor = 0, result = 0;
+    vector<int> temp;
+    a.push_back(0);
+    int posH = 0;
+    for (int i = (int) a.size() - 1; i >= (int) b.size(); --i)
+    {
+        divident = ((__int128) a[i]) * ((__int128) BASE) * ((__int128) BASE) + ((__int128) a[i - 1]) * ((__int128) BASE) + ((__int128) a[i - 2]);
+        divisor = ((__int128) b[b.size() - 1]) * ((__int128) BASE) + ((__int128) b[b.size() - 2]);
+        result = divident / divisor;
+        result = min(result, (__int128) NEEDBIT);
+        multiply(temp, {(int) result}, b);
+        if (comparePref(a, i, (int) b.size() + 1, temp) == -1)
+        {
+            --result;
+             multiply(temp, {(int) result}, b);
+        }
+        res.push_back((int) result);
+        subPref(a, i, (int) b.size() + 1, temp);
+    }
+    reverse(res.begin(), res.end());
+    normalize(res);
+}
+
 int comp(big_integer const& a, big_integer const& b, bool absCompare)
 {
     if (!absCompare && a.sign != b.sign)
@@ -540,13 +613,11 @@ std::ostream& operator>>(std::ostream &s, big_integer const& a)
     s << to_string(a);
     return s;
 }
-/*int main()
+int main()
 {
-    big_integer a(0xaa);
-    cout << (0xaa) << endl;
-    print(a);
-    cout << (~(0xaa)) << endl;
-    print(~a);
+    big_integer a("1000000000000000000000000000000000"); /// 10^33
+    big_integer b("100000000000000000000000"); /// 10^23
+    print(a / b);
+    // big_integer("-21474x83648");
     return 0;
 }
-*/

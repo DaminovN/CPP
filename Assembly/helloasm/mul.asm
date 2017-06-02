@@ -60,7 +60,7 @@ solve:
 ;    rdi -- address of summand #1 (long number)
 ;    rsi -- address of summand #2 (long number)
 ;    rcx -- length of long numbers in qwords
-; result : rdi
+; result : rdx
 mul_long_long:
                 push            rdx
                 push            rax
