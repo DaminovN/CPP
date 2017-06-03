@@ -1,4 +1,4 @@
-//#include<bits/stdc++.h>
+#include<bits/stdc++.h>
 #include <cstring>
 #include <stdexcept>
 #include <iostream>
@@ -282,92 +282,58 @@ void multiply(vector<int> &res, const vector<int> a, const vector<int> &b)
     }
     normalize(res);
 }
-int vec_cmp(vector<int> const &a, vector<int> const &b)
+int vec_cmp(vector<int> const &a, vector<int> const &b, int pos1, int pos2, int len)
 {
-     if (a.size() != b.size())
+     int x, y;
+     for (int i = 0; i < len; ++i)
      {
-         return (a.size() > b.size()) ? 1 : -1;
-     }
-     for (int it = (int)a.size() - 1; it >= 0; it--)
-     {
-        if (a[it] != b[it])
+//         assert(pos1 + i < (int) a.size());
+        x = a[pos1 - i];
+        y = b[pos2 - i];
+//        x= 0 ;
+        if (x != y)
         {
-            return a[it] > b[it] ? 1 : -1;
+            return x > y ? 1 : -1;
         }
      }
      return 0;
  }
-/*void longDiv(vector<int>& res, const vector<int> a, const vector<int>& b)
+int comparePref(const vector<int>& a, int pos, int len, vector<int>& b)
 {
-    if (a.size() < b.size())
+    while (len > 0 && pos >= 0 && a[pos] == 0)
     {
-        res = {0};
-        return;
+        --len;
+        --pos;
     }
-    else if (b.size() == 1)
+    if (len == 0)
     {
-        int nth = 0;
-        shortDivMod(BASE, b[0], a, res, nth);
-        return;
+        pos++;
+        len++;
     }
-    vector<int> temp, val;
-    res.resize(a.size() - b.size() + 2);
-    fill(res.begin(), res.end(), 0);
-//    int it = res.size() - 1;
-    bool flag = false;
-    for (int i = (int) a.size() - 1; i >= 0; --i)
+    if ((int) b.size() != len)
     {
-        val.insert(val.begin(), a[i]);
-        long long int l = 1, r = vec_cmp(val, b) >= 0 ? BASE : 1;
-        while (l < r)
-        {
-            int m = (l + r) >> 1;
-            multiply(temp, {(int) m}, b);
-            if (vec_cmp(val, temp) >= 0)
-                l = m + 1;
-            else
-                r = m;
-        }
-        if (!flag && r - 1 == 0)
-            continue;
-        flag = true;
-        res[i] = (int) (r - 1);
-        multiply(temp, {res[i]}, b);
-        subtract(val, val, temp);
-        while(!val.empty() && val.back() == 0)
-            val.pop_back();
+        return len < (int) b.size() ? -1 : 1;
     }
-    normalize(res);
-}*/
-int comparePref(const vector<int>& a, int pos, int len, const vector<int>& b)
-{
-    vector<int> cmp;
-    for (int i = pos; len > 0; --len, --i)
-    {
-        cmp.push_back(a[i]);
-    }
-    reverse(cmp.begin(), cmp.end());
-    normalize(cmp);
-    return vec_cmp(cmp, b);
+    return vec_cmp(a, b, pos, (int) b.size() - 1, len);
 }
 void subPref(vector<int>& a, int pos, int len, const vector<int>& b)
 {
-    vector<int> cmp;
-    int ln = len;
-    for (int i = pos; len > 0; --len, --i)
+    long long int cur;
+
+    int pos2 = pos - len + 1;
+
+    for (int i = 0; i < len; ++i)
     {
-        cmp.push_back(a[i]);
+        cur = a[pos2 + i];
+        if (a[pos2 + i] < (i < (int) b.size() ? b[i] : 0))
+        {
+            cur += BASE;
+            a[pos2 + i + 1]--;
+        }
+        cur -= (i < (int) b.size() ? b[i] : 0);
+        a[pos2 + i] = cur;
     }
-    reverse(cmp.begin(), cmp.end());
-    normalize(cmp);
-    vector<int> res;
-    subtract(res, cmp, b);
-    len = ln;
-    ln = (int) res.size() - 1;
-    for (int i = pos; len > 0; --len, --i)
-    {
-        a[i] = (len <= (int) res.size()) ? res[ln--] : 0;
-    }
+    return;
 }
 void longDiv(vector<int>& res, vector<int> a, const vector<int>& b)
 {
