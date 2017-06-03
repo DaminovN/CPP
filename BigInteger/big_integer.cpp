@@ -6,6 +6,8 @@
 using namespace std;
 
 
+__extension__ typedef __int128 int128_t;
+
 const long long int BASE = (1ll << 31ll);
 const int NEEDBIT = (int) (BASE - 1ll);
 const long long int MOD = (1ll << 31ll);
@@ -362,10 +364,9 @@ void subPref(vector<int>& a, int pos, int len, const vector<int>& b)
     subtract(res, cmp, b);
     len = ln;
     ln = (int) res.size() - 1;
-    int sz = len - (int) res.size();
     for (int i = pos; len > 0; --len, --i)
     {
-        a[i] = (len <= res.size()) ? res[ln--] : 0;
+        a[i] = (len <= (int) res.size()) ? res[ln--] : 0;
     }
 }
 void longDiv(vector<int>& res, vector<int> a, const vector<int>& b)
@@ -382,17 +383,15 @@ void longDiv(vector<int>& res, vector<int> a, const vector<int>& b)
         return;
     }
     res.clear();
-    bool flag = false;
-    __int128 divident = 0, divisor = 0, result = 0;
+    int128_t divident = 0, divisor = 0, result = 0;
     vector<int> temp;
     a.push_back(0);
-    int posH = 0;
     for (int i = (int) a.size() - 1; i >= (int) b.size(); --i)
     {
-        divident = ((__int128) a[i]) * ((__int128) BASE) * ((__int128) BASE) + ((__int128) a[i - 1]) * ((__int128) BASE) + ((__int128) a[i - 2]);
-        divisor = ((__int128) b[b.size() - 1]) * ((__int128) BASE) + ((__int128) b[b.size() - 2]);
+        divident = ((int128_t) a[i]) * ((int128_t) BASE) * ((int128_t) BASE) + ((int128_t) a[i - 1]) * ((int128_t) BASE) + ((int128_t) a[i - 2]);
+        divisor = ((int128_t) b[b.size() - 1]) * ((int128_t) BASE) + ((int128_t) b[b.size() - 2]);
         result = divident / divisor;
-        result = min(result, (__int128) NEEDBIT);
+        result = min(result, (int128_t) NEEDBIT);
         multiply(temp, {(int) result}, b);
         if (comparePref(a, i, (int) b.size() + 1, temp) == -1)
         {
@@ -613,11 +612,11 @@ std::ostream& operator>>(std::ostream &s, big_integer const& a)
     s << to_string(a);
     return s;
 }
-int main()
+/*int main()
 {
     big_integer a("1000000000000000000000000000000000"); /// 10^33
     big_integer b("100000000000000000000000"); /// 10^23
     print(a / b);
     // big_integer("-21474x83648");
     return 0;
-}
+}*/
