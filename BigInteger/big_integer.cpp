@@ -12,10 +12,6 @@ const long long int BASE = (1ll << 31ll);
 const int NEEDBIT = (int) (BASE - 1ll);
 const long long int MOD = (1ll << 31ll);
 const int BASEPOW = 31;
-// const long long int BASE = 10;
-// const int NEEDBIT = 9;
-// const long long int MOD = 10ll;
-// const int BASEPOW = 31;
 int nothing;
 
 big_integer::big_integer() : v(1, 0), sign(1) {}
@@ -264,7 +260,7 @@ void multiply(vector<int> &res, const vector<int> a, const vector<int> &b)
     long long int carry;
     vector<long long int> resTemp;
     resTemp.resize(a.size() + b.size() + 1);
-    long long int cur;
+    unsigned long long int cur;
     for (size_t i = 0; i < a.size(); ++i)
     {
         carry = 0;

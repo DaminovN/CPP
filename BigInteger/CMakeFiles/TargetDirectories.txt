@@ -1,0 +1,3 @@
+/home/daminovn/Desktop/CPP/cpp-course/Assembly/BigInteger/CMakeFiles/edit_cache.dir
+/home/daminovn/Desktop/CPP/cpp-course/Assembly/BigInteger/CMakeFiles/rebuild_cache.dir
+/home/daminovn/Desktop/CPP/cpp-course/Assembly/BigInteger/CMakeFiles/big_integer_testing.dir
