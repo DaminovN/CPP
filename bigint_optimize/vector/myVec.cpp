@@ -93,7 +93,7 @@ void myVec::push_back(int rhs)
 void myVec::safe_delete()
 {
 	if (big->count > 1)
-		big->count--;
+        big->count--;
 	else 
 		delete big;
 }
@@ -176,6 +176,7 @@ void myVec::clear()
 	{
 		separate();
 		big->data.clear();
+        safe_delete();
 	}
     isEmpty = true;
 }
@@ -200,7 +201,7 @@ myVec::myVec(size_t sz) : myVec()
 {
 	resize(sz);
 }
-myVec::myVec(size_t sz, int val) : myVec() 
+myVec::myVec(size_t sz, int val) : small(0), isSmall(false), isEmpty(true)
 {
 	resize(sz, val);
 }
@@ -229,6 +230,7 @@ myVec& myVec::operator=(const myVec& rhs)
     }
     else
     {
+        safe_delete();
         big = rhs.big;
         big->count++;
     }
