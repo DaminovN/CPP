@@ -10,9 +10,13 @@ vector<uint8_t> res;
 // argv[1] = "enc" or "dec"
 // argv[2] = direction from where to read
 // argv[3] = direction of file where to write output
-//-----------------------------------------------------------------------
+//-------------------------------------------------------------------
 int main(int argc, char ** argv)
 {
+	if (argc != 4)
+	{
+		throw runtime_error("4 ARGUMENTS EXPECTED");
+	}
 	ifstream read;
 	ofstream write;
 	string s = argv[1];
