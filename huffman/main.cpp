@@ -1,4 +1,8 @@
-#include<bits/stdc++.h>
+#include<iostream>
+#include<string>
+#include<memory>
+#include<vector>
+#include<fstream>
 #include "huflib.h"
 using namespace std;
 const int blockSize = 128000;

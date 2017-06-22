@@ -2,7 +2,11 @@
 #define HUFLIB
 
 
-#include<bits/stdc++.h>
+#include<iostream>
+#include<string>
+#include<memory>
+#include<vector>
+
 struct huffman
 {
 public:

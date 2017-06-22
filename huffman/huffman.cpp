@@ -1,29 +1,21 @@
-#include<bits/stdc++.h>
+#include<iostream>
+#include<cstring>
+#include<memory>
+#include<vector>
+#include<algorithm>
+#include<cstdio>
 #include "huflib.h"
 using namespace std;
-/*const int alphabetSize = 256;
-unsigned long long int number[alphabetSize * 2];
-bool hufTreeBuilt = false;
-bool isRight[alphabetSize * 2];
-int leftSon[alphabetSize * 2], rightSon[alphabetSize * 2];
-int maxNode = alphabetSize;
-int tPar[alphabetSize * 2];*/
 huffman::huffman()
 {
 	memset(this, 0, sizeof(this));
 }
 void huffman::addInfo(uint8_t* & a, int sz)
 {
-	// for (int i = 0; i < sz; ++i)
-	// {
-	// 	cerr << (int) a[i];
-	// }
-	// cerr << endl;
 	for (int i = 0; i < sz; ++i)
 	{
 		++number[a[i]];
 	}
-	// cerr << "EXITING addInfo\n";
 }
 void huffman::buildTree()
 {
@@ -31,9 +23,7 @@ void huffman::buildTree()
 	int first[alphabetSize] = {0};
 	for (int i = 0; i < alphabetSize; ++i)
 		first[i] = i;
-	// cerr << "HERE\n";
 	sort(first, first + alphabetSize, [this](int a, int b) { return number[a] < number[b]; });
-	// cerr << "HERE\n";
 	int second[alphabetSize] = {0};
 	int sz2 = 0;
 	int fPointer = 0, sPointer = 0;
@@ -67,7 +57,6 @@ void huffman::buildTree()
 		}
 		second[sz2++] = ++maxNode;
 		number[maxNode] = number[a] + number[b];
-		// cout << a << " " << b << " -> " << maxNode << endl;
 		tPar[a] = tPar[b] = maxNode;
 		leftSon[maxNode] = a;
 		rightSon[maxNode] = b;
@@ -102,7 +91,6 @@ pair<int, vector<uint8_t>> huffman::encode(uint8_t* & a, int sz)
 	vector<uint8_t> v;
 	int cnt = 0;
 	uint8_t val = 0;
-	int asd = 0;
 	for (int i = 0; i < sz; ++i)
 	{
 		int pos = a[i];
@@ -116,10 +104,6 @@ pair<int, vector<uint8_t>> huffman::encode(uint8_t* & a, int sz)
 				v.push_back(val);
 				val = cnt = 0;
 			}
-			// cerr << pos << " " << tPar[pos] << endl;
-			++asd;
-			// if (asd == 10)
-			// exit(0);
 			pos = tPar[pos];
 		}
 	}
@@ -168,11 +152,6 @@ vector<uint8_t> huffman::decode(uint8_t* & a, int sz, int unNeededBits)
 		}
 	}
 	reverse(res.begin(), res.end());
-	// for (int i = 0; i < res.size(); ++i)
-	// {
-	// 	cout << res[i];
-	// }
-	// cout << endl;
 	return res;
 }
 /*int main()
