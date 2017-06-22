@@ -1,14 +1,18 @@
 #include<bits/stdc++.h>
 #include "huflib.h"
 using namespace std;
-const int alphabetSize = 256;
+/*const int alphabetSize = 256;
 unsigned long long int number[alphabetSize * 2];
 bool hufTreeBuilt = false;
 bool isRight[alphabetSize * 2];
 int leftSon[alphabetSize * 2], rightSon[alphabetSize * 2];
 int maxNode = alphabetSize;
-int tPar[alphabetSize * 2];
-void addInfo(uint8_t* & a, int sz)
+int tPar[alphabetSize * 2];*/
+huffman::huffman()
+{
+	memset(this, 0, sizeof(this));
+}
+void huffman::addInfo(uint8_t* & a, int sz)
 {
 	// for (int i = 0; i < sz; ++i)
 	// {
@@ -21,19 +25,14 @@ void addInfo(uint8_t* & a, int sz)
 	}
 	// cerr << "EXITING addInfo\n";
 }
-bool hufCmp(int a, int b)
-{
-	// cerr << "HERE1\n";
-	return (number[a] < number[b]);
-}
-void buildTree()
+void huffman::buildTree()
 {
 	hufTreeBuilt = true;
 	int first[alphabetSize] = {0};
 	for (int i = 0; i < alphabetSize; ++i)
 		first[i] = i;
 	// cerr << "HERE\n";
-	sort(first, first + alphabetSize, hufCmp);
+	sort(first, first + alphabetSize, [this](int a, int b) { return number[a] < number[b]; });
 	// cerr << "HERE\n";
 	int second[alphabetSize] = {0};
 	int sz2 = 0;
@@ -75,7 +74,7 @@ void buildTree()
 		isRight[b] = true;
 	}
 }
-void buildTree(vector<pair<uint8_t, int>> res)
+void huffman::buildTree(vector<pair<uint8_t, int>> res)
 {
 	for (size_t i = 0; i < res.size(); ++i)
 	{
@@ -83,7 +82,7 @@ void buildTree(vector<pair<uint8_t, int>> res)
 	}
 	buildTree();
 }
-vector<pair<uint8_t, int>> getTreeCode()
+vector<pair<uint8_t, int>> huffman::getTreeCode()
 {
 	vector<pair<uint8_t, int>> res;
 	for (int i = 0; i < alphabetSize; ++i)
@@ -96,7 +95,7 @@ vector<pair<uint8_t, int>> getTreeCode()
 	return res;
 
 }
-pair<int, vector<uint8_t>> encode(uint8_t* & a, int sz)
+pair<int, vector<uint8_t>> huffman::encode(uint8_t* & a, int sz)
 {
 	if (!hufTreeBuilt)
 		buildTree();
@@ -132,7 +131,7 @@ pair<int, vector<uint8_t>> encode(uint8_t* & a, int sz)
 	}
 	return {sz2, v};
 }
-vector<uint8_t> decode(uint8_t* & a, int sz, int unNeededBits)
+vector<uint8_t> huffman::decode(uint8_t* & a, int sz, int unNeededBits)
 {
 	vector<uint8_t> res;
 	a[sz - 1] >>= unNeededBits;

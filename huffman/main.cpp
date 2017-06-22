@@ -24,6 +24,7 @@ int main(int argc, char ** argv)
 	{
 		write.open(argv[3]);
 		read.open(argv[2]);
+		huffman encode;
 		if (read.fail())
 		{
 			throw runtime_error("SUCH FILE NOT FOUND");
@@ -33,10 +34,10 @@ int main(int argc, char ** argv)
 		while (!read.eof())
 		{
 			read.read((char *) data, blockSize);
-			addInfo(data, read.gcount());
+			encode.addInfo(data, read.gcount());
 			// cerr << "HERE\n";
 		}
-		tree = getTreeCode();
+		tree = encode.getTreeCode();
 		uint32_t trSize = (uint32_t)tree.size();
 		write.write((char *) &trSize, sizeof(uint32_t));
 		for (int i = 0; i < tree.size(); ++i)
@@ -50,7 +51,7 @@ int main(int argc, char ** argv)
 		{
 			// cerr << "HERE\n";
 			read.read((char *)data, blockSize);
-			enc = encode(data, (int) read.gcount());
+			enc = encode.encode(data, (int) read.gcount());
 			uint32_t sz = enc.first;
 			// cerr << enc.second.size() << endl;
 			write.write((char *) &(sz), sizeof(uint32_t));
@@ -65,6 +66,7 @@ int main(int argc, char ** argv)
 	{
 		write.open(argv[3]);
 		read.open(argv[2]);
+		huffman decode;
 		if (read.fail())
 		{
 			throw runtime_error("SUCH FILE NOT FOUND");
@@ -77,7 +79,7 @@ int main(int argc, char ** argv)
 			read.read((char *) &(tree[i].first), 1);
 			read.read((char *) &(tree[i].second), sizeof(uint32_t));
 		}
-		buildTree(tree);
+		decode.buildTree(tree);
 		uint8_t* data;
 		data = new uint8_t[blockSize];
 		while(!read.eof())
@@ -93,15 +95,15 @@ int main(int argc, char ** argv)
 			vecSize += unNeed;
 			vecSize /= 8;
 			read.read((char *) data, vecSize);
-			res = decode(data, vecSize, unNeed);
+			res = decode.decode(data, vecSize, unNeed);
 			write.write((char *) res.data(), res.size());
 		}
+		delete data;
 		read.close();
 		write.close();
 	}
 	else 
 	{
-		// cout << argv[0] << " " << argv[1] << " " << argv[2] << " " << "<-" << endl;
 		throw runtime_error("Undefined Operation");
 	}
 	return 0;
