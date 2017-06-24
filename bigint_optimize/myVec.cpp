@@ -230,6 +230,8 @@ myVec& myVec::operator=(const myVec& rhs)
     }
     else
     {
+    	if (big == rhs.big)
+    		return *this;
         safe_delete();
         big = rhs.big;
         big->count++;
@@ -237,18 +239,17 @@ myVec& myVec::operator=(const myVec& rhs)
     return *this;
 }
 
-/*main()
-{
-	myVec v;
-	for (int i = 0; i < 10; ++i)
-	{
-		v.push_back(i);
-	}
-	cout << v.size() << endl;
-	myVec v2(v);
-	cout << v2.size() << endl;
-	v2[0] = 1;
-	cout << v2.size() << endl;
-	cout << v.size() << endl;
-	return 0;
-}*/
+// main()
+// {
+// 	myVec v;
+// 	for (int i = 0; i < 10; ++i)
+// 	{
+// 		v.push_back(i);
+// 	}
+// 	v = v;
+// 	for (int i = 0; i < 10; ++i)
+// 	{
+// 		cout << v[i] << endl;
+// 	}
+// 	return 0;
+// }
