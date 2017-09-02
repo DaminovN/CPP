@@ -68,6 +68,8 @@ weights::weights(vector<pair<uint8_t, int>> const& res)
 {
 	for (size_t i = 0; i < res.size(); ++i)
 	{
+		if (number[res[i].first] != 0 || res[i].second == 0)
+			throw runtime_error("FILE IS DAMAGED");
 		number[res[i].first] = res[i].second;
 	}
 }
