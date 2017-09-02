@@ -13,6 +13,8 @@ using namespace std;
 //-------------------------------------------------------------------
 int main(int argc, char ** argv)
 {
+	try {
+
 	const int blockSize = 128000;
 	if (argc != 4)
 	{
@@ -69,11 +71,17 @@ int main(int argc, char ** argv)
 		}
 		uint32_t trSize = 0;
 		read.read((char *) &trSize, sizeof(int32_t));
+		if (!read)
+			throw runtime_error("wrong file to decode");
 		for (size_t i = 0; i < trSize; ++i)
 		{
 			tree.push_back({0 , 0});
 			read.read((char *) &(tree[i].first), 1);
+			if (!read)
+				throw runtime_error("wrong file to decode");
 			read.read((char *) &(tree[i].second), sizeof(int32_t));
+			if (!read)
+				throw runtime_error("wrong file to decode");
 		}
 		weights hufT(tree);
 		huffman decode(hufT);
@@ -91,13 +99,17 @@ int main(int argc, char ** argv)
 			vecSize += unNeed;
 			vecSize /= 8;
 			read.read((char *) (data.get()), vecSize);
-			vector<uint8_t> res = res = decode.decode(data.get(), vecSize, unNeed);
+			vector<uint8_t> res = decode.decode(data.get(), vecSize, unNeed);
 			write.write((char *) res.data(), res.size());
 		}
 	}
 	else 
 	{
 		throw runtime_error("Undefined Operation");
+	}
+	}catch(runtime_error const& e) {
+		cout << e.what() << endl;
+		return 1;
 	}
 	return 0;
 }
