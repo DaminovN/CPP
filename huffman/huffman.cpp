@@ -6,37 +6,32 @@
 #include<cstdio>
 #include "huflib.h"
 using namespace std;
-hTree::hTree() {}
-
-void hTree::addInfo(uint8_t* & a, size_t sz)
+void weights::addInfo(uint8_t* & a, int sz)
 {
-	hufTreeBuilt = false;
-	for (size_t i = 0; i < sz; ++i)
+	for (int i = 0; i < sz; ++i)
 	{
-		// cerr << a[i] << " ";
 		++number[a[i]];
 	}
 }
-void hTree::buildTree()
+huffman::huffman(weights rhs)
 {
-	// cerr << "BUILDING :)\n";
 	hufTreeBuilt = true;
 	int first[alphabetSize] = {0};
 	for (int i = 0; i < alphabetSize; ++i)
 		first[i] = i;
-	sort(first, first + alphabetSize, [this](int a, int b) { return number[a] < number[b]; });
+	sort(first, first + alphabetSize, [this, rhs](int a, int b) { return rhs.number[a] < rhs.number[b]; });
 	int second[alphabetSize] = {0};
 	int sz2 = 0;
 	int fPointer = 0, sPointer = 0;
 	int a, b;
 	while (alphabetSize - fPointer + sz2 - sPointer != 1)
 	{
-		if (fPointer < alphabetSize && number[first[fPointer]] == 0)
+		if (fPointer < alphabetSize && rhs.number[first[fPointer]] == 0)
 		{
 			++fPointer;
 			continue;
 		}
-		if (sPointer >= sz2 || (fPointer < alphabetSize && number[first[fPointer]] < number[second[sPointer]]))
+		if (sPointer >= sz2 || (fPointer < alphabetSize && rhs.number[first[fPointer]] < rhs.number[second[sPointer]]))
 		{
 			a = first[fPointer];
 			fPointer++;
@@ -46,7 +41,7 @@ void hTree::buildTree()
 			a = second[sPointer];
 			sPointer++;
 		}
-		if (sPointer >= sz2 || (fPointer < alphabetSize && number[first[fPointer]] < number[second[sPointer]]))
+		if (sPointer >= sz2 || (fPointer < alphabetSize && rhs.number[first[fPointer]] < rhs.number[second[sPointer]]))
 		{
 			b = first[fPointer];
 			fPointer++;
@@ -57,22 +52,25 @@ void hTree::buildTree()
 			sPointer++;
 		}
 		second[sz2++] = ++maxNode;
-		number[maxNode] = number[a] + number[b];
+		rhs.number[maxNode] = rhs.number[a] + rhs.number[b];
 		tPar[a] = tPar[b] = maxNode;
 		leftSon[maxNode] = a;
 		rightSon[maxNode] = b;
 		isRight[b] = true;
 	}
 }
-void hTree::buildTree(vector<pair<uint8_t, int>> res)
+weights::weights()
+{
+
+}
+weights::weights(vector<pair<uint8_t, int>> res)
 {
 	for (size_t i = 0; i < res.size(); ++i)
 	{
 		number[res[i].first] = res[i].second;
 	}
-	buildTree();
 }
-vector<pair<uint8_t, int>> hTree::getTreeCode()
+vector<pair<uint8_t, int>> weights::getTreeCode()
 {
 	vector<pair<uint8_t, int>> res;
 	for (int i = 0; i < alphabetSize; ++i)
@@ -85,17 +83,6 @@ vector<pair<uint8_t, int>> hTree::getTreeCode()
 	return res;
 
 }
-
-
-huffman::huffman(hTree& newTree) : theTree(newTree)
-{
-	// cerr << "BUILT " << theTree.hufTreeBuilt << endl;
-	if (!theTree.hufTreeBuilt)
-		theTree.buildTree();
-	// cerr << "FINISHED\n";
-}
-
-
 pair<int, vector<uint8_t>> huffman::encode(uint8_t* & a, int sz)
 {
 	// if (!hufTreeBuilt)
@@ -105,19 +92,18 @@ pair<int, vector<uint8_t>> huffman::encode(uint8_t* & a, int sz)
 	uint8_t val = 0;
 	for (int i = 0; i < sz; ++i)
 	{
-		// cerr << a[i] << " " << i << endl;
 		int pos = a[i];
-		while (pos != theTree.maxNode)
+		while (pos != maxNode)
 		{
 			val <<= 1;
-			val += (int) theTree.isRight[pos];
+			val += (int) isRight[pos];
 			++cnt;
 			if (cnt == 8)
 			{
 				v.push_back(val);
 				val = cnt = 0;
 			}
-			pos = theTree.tPar[pos];
+			pos = tPar[pos];
 		}
 	}
 	int sz2 = v.size() * 8 + cnt;
@@ -126,14 +112,12 @@ pair<int, vector<uint8_t>> huffman::encode(uint8_t* & a, int sz)
 		val <<= (8 - cnt);
 		v.push_back(val);
 	}
-	// cerr << "THE SIZE IS " << v.size() << " " << sz2 << " " << (int) v[0] << endl;
 	return {sz2, v};
 }
 vector<uint8_t> huffman::decode(uint8_t* & a, int sz, int unNeededBits)
 {
 	vector<uint8_t> res;
 	a[sz - 1] >>= unNeededBits;
-	// cerr << "IN DECODE " << (int) a[sz - 1] << endl;
 	vector<bool> bl;
 	int curSz;
 	for (int i = 0; i < sz - 1; ++i)
@@ -156,19 +140,17 @@ vector<uint8_t> huffman::decode(uint8_t* & a, int sz, int unNeededBits)
 		}
 		reverse(bl.begin() + curSz, bl.end());
 	}
-	int curPos = theTree.maxNode;
+	int curPos = maxNode;
 	for (int i = bl.size() - 1; i >= 0; --i)
 	{
-		curPos = (bl[i] == 0) ? theTree.leftSon[curPos] : theTree.rightSon[curPos];
+		curPos = (bl[i] == 0) ? leftSon[curPos] : rightSon[curPos];
 		if (curPos < 256)
 		{
-			// cerr << "FOUND " << (char) curPos << endl;
 			res.push_back(curPos);
-			curPos = theTree.maxNode;
+			curPos = maxNode;
 		}
 	}
 	reverse(res.begin(), res.end());
-	// cerr << "DECODE " << res.size() << " " << (int) res[0] << endl;
 	return res;
 }
 /*int main()

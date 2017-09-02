@@ -1,3 +1,5 @@
-NODIR
-DAMINOV
-AESTHETIC
+Nodir
+Nodir
+Nodir
+Daminov
+C++

@@ -28,7 +28,7 @@ int main(int argc, char ** argv)
 	{
 		write.open(argv[3]);
 		read.open(argv[2]);
-		hTree hufT;
+		weights hufT;
 		if (read.fail() || write.fail())
 		{
 			throw runtime_error("SUCH FILE NOT FOUND");
@@ -69,7 +69,6 @@ int main(int argc, char ** argv)
 		{
 			throw runtime_error("SUCH FILE NOT FOUND");
 		}
-		hTree hufT;
 		uint32_t trSize = 0;
 		read.read((char *) &trSize, sizeof(int32_t));
 		for (size_t i = 0; i < trSize; ++i)
@@ -78,8 +77,9 @@ int main(int argc, char ** argv)
 			read.read((char *) &(tree[i].first), 1);
 			read.read((char *) &(tree[i].second), sizeof(int32_t));
 		}
-		hufT.buildTree(tree);
+		weights hufT(tree);
 		huffman decode(hufT);
+		// decode.buildTree(tree);
 		uint8_t* data;
 		data = new uint8_t[blockSize];
 		while(!read.eof())
