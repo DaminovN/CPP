@@ -5,10 +5,6 @@
 #include<fstream>
 #include "huflib.h"
 using namespace std;
-const int blockSize = 128000;
-pair<int, vector<uint8_t>> enc;
-vector<pair<uint8_t, int>> tree;
-vector<uint8_t> res;
 //-----------------------------------------------------------------------
 // FORMAT OF INPUT :
 // argv[1] = "enc" or "dec"
@@ -17,6 +13,10 @@ vector<uint8_t> res;
 //-------------------------------------------------------------------
 int main(int argc, char ** argv)
 {
+	const int blockSize = 128000;
+	pair<int, vector<uint8_t>> enc;
+	vector<pair<uint8_t, int>> tree;
+	vector<uint8_t> res;
 	if (argc != 4)
 	{
 		throw runtime_error("4 ARGUMENTS EXPECTED");
@@ -28,10 +28,9 @@ int main(int argc, char ** argv)
 	{
 		write.open(argv[3]);
 		read.open(argv[2]);
-		huffman encode;
-		if (read.fail())
+		hTree hufT;
+		if (read.fail() || write.fail())
 		{
-			write.close();
 			throw runtime_error("SUCH FILE NOT FOUND");
 		}
 		uint8_t* data;
@@ -39,9 +38,9 @@ int main(int argc, char ** argv)
 		while (!read.eof())
 		{
 			read.read((char *) data, blockSize);
-			encode.addInfo(data, read.gcount());
+			hufT.addInfo(data, read.gcount());
 		}
-		tree = encode.getTreeCode();
+		tree = hufT.getTreeCode();
 		uint32_t trSize = (uint32_t)tree.size();
 		write.write((char *) &trSize, sizeof(int32_t));
 		for (int i = 0; i < tree.size(); ++i)
@@ -51,6 +50,7 @@ int main(int argc, char ** argv)
 		}
 		read.clear();
 		read.seekg(0);
+		huffman encode(hufT);
 		while (!read.eof())
 		{
 			read.read((char *)data, blockSize);
@@ -60,19 +60,16 @@ int main(int argc, char ** argv)
 			write.write((char *) enc.second.data(), enc.second.size());
 		}
 		delete[] data;
-		read.close();
-		write.close();
 	}
 	else if (s == "dec")
 	{
 		write.open(argv[3]);
 		read.open(argv[2]);
-		huffman decode;
-		if (read.fail())
+		if (read.fail() || write.fail())
 		{
-			write.close();
 			throw runtime_error("SUCH FILE NOT FOUND");
 		}
+		hTree hufT;
 		uint32_t trSize = 0;
 		read.read((char *) &trSize, sizeof(int32_t));
 		for (size_t i = 0; i < trSize; ++i)
@@ -81,7 +78,8 @@ int main(int argc, char ** argv)
 			read.read((char *) &(tree[i].first), 1);
 			read.read((char *) &(tree[i].second), sizeof(int32_t));
 		}
-		decode.buildTree(tree);
+		hufT.buildTree(tree);
+		huffman decode(hufT);
 		uint8_t* data;
 		data = new uint8_t[blockSize];
 		while(!read.eof())
@@ -101,8 +99,6 @@ int main(int argc, char ** argv)
 			write.write((char *) res.data(), res.size());
 		}
 		delete[] data;
-		read.close();
-		write.close();
 	}
 	else 
 	{

@@ -6,19 +6,20 @@
 #include<cstdio>
 #include "huflib.h"
 using namespace std;
-huffman::huffman()
+hTree::hTree() {}
+
+void hTree::addInfo(uint8_t* & a, size_t sz)
 {
-	memset(this, 0, sizeof(this));
-}
-void huffman::addInfo(uint8_t* & a, int sz)
-{
-	for (int i = 0; i < sz; ++i)
+	hufTreeBuilt = false;
+	for (size_t i = 0; i < sz; ++i)
 	{
+		// cerr << a[i] << " ";
 		++number[a[i]];
 	}
 }
-void huffman::buildTree()
+void hTree::buildTree()
 {
+	// cerr << "BUILDING :)\n";
 	hufTreeBuilt = true;
 	int first[alphabetSize] = {0};
 	for (int i = 0; i < alphabetSize; ++i)
@@ -63,7 +64,7 @@ void huffman::buildTree()
 		isRight[b] = true;
 	}
 }
-void huffman::buildTree(vector<pair<uint8_t, int>> res)
+void hTree::buildTree(vector<pair<uint8_t, int>> res)
 {
 	for (size_t i = 0; i < res.size(); ++i)
 	{
@@ -71,7 +72,7 @@ void huffman::buildTree(vector<pair<uint8_t, int>> res)
 	}
 	buildTree();
 }
-vector<pair<uint8_t, int>> huffman::getTreeCode()
+vector<pair<uint8_t, int>> hTree::getTreeCode()
 {
 	vector<pair<uint8_t, int>> res;
 	for (int i = 0; i < alphabetSize; ++i)
@@ -84,27 +85,39 @@ vector<pair<uint8_t, int>> huffman::getTreeCode()
 	return res;
 
 }
+
+
+huffman::huffman(hTree& newTree) : theTree(newTree)
+{
+	// cerr << "BUILT " << theTree.hufTreeBuilt << endl;
+	if (!theTree.hufTreeBuilt)
+		theTree.buildTree();
+	// cerr << "FINISHED\n";
+}
+
+
 pair<int, vector<uint8_t>> huffman::encode(uint8_t* & a, int sz)
 {
-	if (!hufTreeBuilt)
-		buildTree();
+	// if (!hufTreeBuilt)
+	// 	buildTree();
 	vector<uint8_t> v;
 	int cnt = 0;
 	uint8_t val = 0;
 	for (int i = 0; i < sz; ++i)
 	{
+		// cerr << a[i] << " " << i << endl;
 		int pos = a[i];
-		while (pos != maxNode)
+		while (pos != theTree.maxNode)
 		{
 			val <<= 1;
-			val += (int) isRight[pos];
+			val += (int) theTree.isRight[pos];
 			++cnt;
 			if (cnt == 8)
 			{
 				v.push_back(val);
 				val = cnt = 0;
 			}
-			pos = tPar[pos];
+			pos = theTree.tPar[pos];
 		}
 	}
 	int sz2 = v.size() * 8 + cnt;
@@ -113,12 +126,14 @@ pair<int, vector<uint8_t>> huffman::encode(uint8_t* & a, int sz)
 		val <<= (8 - cnt);
 		v.push_back(val);
 	}
+	// cerr << "THE SIZE IS " << v.size() << " " << sz2 << " " << (int) v[0] << endl;
 	return {sz2, v};
 }
 vector<uint8_t> huffman::decode(uint8_t* & a, int sz, int unNeededBits)
 {
 	vector<uint8_t> res;
 	a[sz - 1] >>= unNeededBits;
+	// cerr << "IN DECODE " << (int) a[sz - 1] << endl;
 	vector<bool> bl;
 	int curSz;
 	for (int i = 0; i < sz - 1; ++i)
@@ -141,17 +156,19 @@ vector<uint8_t> huffman::decode(uint8_t* & a, int sz, int unNeededBits)
 		}
 		reverse(bl.begin() + curSz, bl.end());
 	}
-	int curPos = maxNode;
+	int curPos = theTree.maxNode;
 	for (int i = bl.size() - 1; i >= 0; --i)
 	{
-		curPos = (bl[i] == 0) ? leftSon[curPos] : rightSon[curPos];
+		curPos = (bl[i] == 0) ? theTree.leftSon[curPos] : theTree.rightSon[curPos];
 		if (curPos < 256)
 		{
+			// cerr << "FOUND " << (char) curPos << endl;
 			res.push_back(curPos);
-			curPos = maxNode;
+			curPos = theTree.maxNode;
 		}
 	}
 	reverse(res.begin(), res.end());
+	// cerr << "DECODE " << res.size() << " " << (int) res[0] << endl;
 	return res;
 }
 /*int main()
