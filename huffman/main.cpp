@@ -33,12 +33,13 @@ int main(int argc, char ** argv)
 		{
 			throw runtime_error("SUCH FILE NOT FOUND");
 		}
-		uint8_t* data;
-		data = new uint8_t[blockSize];
+		// uint8_t* data;
+		// data = new uint8_t[blockSize];
+		unique_ptr<uint8_t[]> data(new uint8_t[blockSize]);
 		while (!read.eof())
 		{
-			read.read((char *) data, blockSize);
-			hufT.addInfo(data, read.gcount());
+			read.read((char *) (data.get()), blockSize);
+			hufT.addInfo(data.get(), read.gcount());
 		}
 		tree = hufT.getTreeCode();
 		uint32_t trSize = (uint32_t)tree.size();
@@ -53,13 +54,13 @@ int main(int argc, char ** argv)
 		huffman encode(hufT);
 		while (!read.eof())
 		{
-			read.read((char *)data, blockSize);
-			enc = encode.encode(data, (int) read.gcount());
+			read.read((char *) (data.get()), blockSize);
+			enc = encode.encode(data.get(), (int) read.gcount());
 			uint32_t sz = enc.first;
 			write.write((char *) &(sz), sizeof(int32_t));
 			write.write((char *) enc.second.data(), enc.second.size());
 		}
-		delete[] data;
+		// delete[] data;
 	}
 	else if (s == "dec")
 	{
@@ -80,8 +81,9 @@ int main(int argc, char ** argv)
 		weights hufT(tree);
 		huffman decode(hufT);
 		// decode.buildTree(tree);
-		uint8_t* data;
-		data = new uint8_t[blockSize];
+		// uint8_t* data;
+		// data = new uint8_t[blockSize];
+		unique_ptr<uint8_t[]> data(new uint8_t[blockSize]);
 		while(!read.eof())
 		{
 			uint32_t sz = 0;
@@ -94,11 +96,11 @@ int main(int argc, char ** argv)
 			}
 			vecSize += unNeed;
 			vecSize /= 8;
-			read.read((char *) data, vecSize);
-			res = decode.decode(data, vecSize, unNeed);
+			read.read((char *) (data.get()), vecSize);
+			res = decode.decode(data.get(), vecSize, unNeed);
 			write.write((char *) res.data(), res.size());
 		}
-		delete[] data;
+		// delete[] data;
 	}
 	else 
 	{
