@@ -6,14 +6,14 @@
 #include<string>
 #include<memory>
 #include<vector>
+const size_t alphabetSize = 256;
 struct weights
 {
 	weights();
 	weights(std::vector<std::pair<uint8_t, int>> const& res);
 	void addInfo(const uint8_t* a, size_t sz);
-	std::vector<std::pair<uint8_t, int>> getTreeCode();
-	unsigned long long int number[256 * 2] = {};
-	static const int alphabetSize = 256;
+	std::vector<std::pair<uint8_t, int>> getTreeCode() const;
+	unsigned long long int number[alphabetSize] = {};
 };
 struct huffman
 {
@@ -22,10 +22,9 @@ public:
 	// huffman(std::vector<std::pair<uint8_t, int>> res);
 	// void buildTree();
 	// void buildTree(std::vector<std::pair<uint8_t, int>> res);
-	std::pair<int, std::vector<uint8_t>> encode(uint8_t* & a, int sz);
-	std::vector<uint8_t> decode(uint8_t* & a, int sz, int unNeededBits);
+	std::pair<int, std::vector<uint8_t>> encode(const uint8_t* a, size_t sz) const;
+	std::vector<uint8_t> decode(const uint8_t* a, size_t sz, int unNeededBits) const;
 private:
-	static const int alphabetSize = 256;
 	bool isRight[alphabetSize * 2] = {};
 	int leftSon[alphabetSize * 2] = {}, rightSon[alphabetSize * 2] = {};
 	int maxNode = alphabetSize - 1;

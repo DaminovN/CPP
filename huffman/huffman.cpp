@@ -71,7 +71,7 @@ weights::weights(vector<pair<uint8_t, int>> const& res)
 		number[res[i].first] = res[i].second;
 	}
 }
-vector<pair<uint8_t, int>> weights::getTreeCode()
+vector<pair<uint8_t, int>> weights::getTreeCode() const
 {
 	vector<pair<uint8_t, int>> res;
 	for (int i = 0; i < alphabetSize; ++i)
@@ -84,12 +84,12 @@ vector<pair<uint8_t, int>> weights::getTreeCode()
 	return res;
 
 }
-pair<int, vector<uint8_t>> huffman::encode(uint8_t* & a, int sz)
+pair<int, vector<uint8_t>> huffman::encode(const uint8_t* a, size_t sz) const
 {
 	vector<uint8_t> v;
 	int cnt = 0;
 	uint8_t val = 0;
-	for (int i = 0; i < sz; ++i)
+	for (size_t i = 0; i < sz; ++i)
 	{
 		int pos = a[i];
 		while (pos != maxNode)
@@ -113,29 +113,31 @@ pair<int, vector<uint8_t>> huffman::encode(uint8_t* & a, int sz)
 	}
 	return {sz2, v};
 }
-vector<uint8_t> huffman::decode(uint8_t* & a, int sz, int unNeededBits)
+vector<uint8_t> huffman::decode(const uint8_t* a, size_t sz, int unNeededBits) const
 {
 	vector<uint8_t> res;
-	a[sz - 1] >>= unNeededBits;
 	vector<bool> bl;
 	int curSz;
-	for (int i = 0; i < sz - 1; ++i)
+	for (size_t i = 0; i + 1 < sz; ++i)
 	{
 		curSz = bl.size();
+		uint8_t e = a[i];
 		for (int j = 0; j < 8; ++j)
 		{
-			bl.push_back(a[i] % 2);
-			a[i] >>= 1;
+			bl.push_back(e % 2);
+			e >>= 1;
 		}
 		reverse(bl.begin() + curSz, bl.end());
 	}
 	if (sz != 0)
 	{
+		uint8_t last = a[sz - 1];
+		last >>= unNeededBits;
 		curSz = bl.size();
 		for (int j = 0; j < 8 - unNeededBits; ++j)
 		{
-			bl.push_back(a[sz - 1] % 2);
-			a[sz - 1] >>= 1;
+			bl.push_back(last % 2);
+			last >>= 1;
 		}
 		reverse(bl.begin() + curSz, bl.end());
 	}
