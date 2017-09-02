@@ -72,16 +72,16 @@ int main(int argc, char ** argv)
 		uint32_t trSize = 0;
 		read.read((char *) &trSize, sizeof(int32_t));
 		if (!read)
-			throw runtime_error("wrong file to decode");
+			throw runtime_error("FILE IS DAMAGED");
 		for (size_t i = 0; i < trSize; ++i)
 		{
 			tree.push_back({0 , 0});
 			read.read((char *) &(tree[i].first), 1);
 			if (!read)
-				throw runtime_error("wrong file to decode");
+				throw runtime_error("FILE IS DAMAGED");
 			read.read((char *) &(tree[i].second), sizeof(int32_t));
 			if (!read)
-				throw runtime_error("wrong file to decode");
+				throw runtime_error("FILE IS DAMAGED");
 		}
 		weights hufT(tree);
 		huffman decode(hufT);
