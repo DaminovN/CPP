@@ -71,7 +71,7 @@ int main(int argc, char ** argv)
 		}
 		uint32_t trSize = 0;
 		read.read((char *) &trSize, sizeof(int32_t));
-		if (!read || trSize >= alphabetSize)
+		if (!read || trSize > alphabetSize)
 			throw runtime_error("FILE IS DAMAGED");
 		for (size_t i = 0; i < trSize; ++i)
 		{
