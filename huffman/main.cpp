@@ -14,9 +14,6 @@ using namespace std;
 int main(int argc, char ** argv)
 {
 	const int blockSize = 128000;
-	pair<int, vector<uint8_t>> enc;
-	vector<pair<uint8_t, int>> tree;
-	vector<uint8_t> res;
 	if (argc != 4)
 	{
 		throw runtime_error("4 ARGUMENTS EXPECTED");
@@ -24,6 +21,7 @@ int main(int argc, char ** argv)
 	ifstream read;
 	ofstream write;
 	string s = argv[1];
+	vector<pair<uint8_t, int>> tree;
 	if (s == "enc")
 	{
 		write.open(argv[3]);
@@ -55,12 +53,11 @@ int main(int argc, char ** argv)
 		while (!read.eof())
 		{
 			read.read((char *) (data.get()), blockSize);
-			enc = encode.encode(data.get(), (int) read.gcount());
+			pair<int, vector<uint8_t>> enc = encode.encode(data.get(), (int) read.gcount());
 			uint32_t sz = enc.first;
 			write.write((char *) &(sz), sizeof(int32_t));
 			write.write((char *) enc.second.data(), enc.second.size());
 		}
-		// delete[] data;
 	}
 	else if (s == "dec")
 	{
@@ -80,9 +77,6 @@ int main(int argc, char ** argv)
 		}
 		weights hufT(tree);
 		huffman decode(hufT);
-		// decode.buildTree(tree);
-		// uint8_t* data;
-		// data = new uint8_t[blockSize];
 		unique_ptr<uint8_t[]> data(new uint8_t[blockSize]);
 		while(!read.eof())
 		{
@@ -97,10 +91,9 @@ int main(int argc, char ** argv)
 			vecSize += unNeed;
 			vecSize /= 8;
 			read.read((char *) (data.get()), vecSize);
-			res = decode.decode(data.get(), vecSize, unNeed);
+			vector<uint8_t> res = res = decode.decode(data.get(), vecSize, unNeed);
 			write.write((char *) res.data(), res.size());
 		}
-		// delete[] data;
 	}
 	else 
 	{
