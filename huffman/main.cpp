@@ -31,6 +31,7 @@ int main(int argc, char ** argv)
 		huffman encode;
 		if (read.fail())
 		{
+			write.close();
 			throw runtime_error("SUCH FILE NOT FOUND");
 		}
 		uint8_t* data;
@@ -39,30 +40,26 @@ int main(int argc, char ** argv)
 		{
 			read.read((char *) data, blockSize);
 			encode.addInfo(data, read.gcount());
-			// cerr << "HERE\n";
 		}
 		tree = encode.getTreeCode();
 		uint32_t trSize = (uint32_t)tree.size();
-		write.write((char *) &trSize, sizeof(uint32_t));
+		write.write((char *) &trSize, sizeof(int32_t));
 		for (int i = 0; i < tree.size(); ++i)
 		{
 			write.write((char *) &tree[i].first, 1);
-			write.write((char *) &tree[i].second, sizeof(uint32_t));
+			write.write((char *) &tree[i].second, sizeof(int32_t));
 		}
 		read.clear();
 		read.seekg(0);
 		while (!read.eof())
 		{
-			// cerr << "HERE\n";
 			read.read((char *)data, blockSize);
 			enc = encode.encode(data, (int) read.gcount());
 			uint32_t sz = enc.first;
-			// cerr << enc.second.size() << endl;
-			write.write((char *) &(sz), sizeof(uint32_t));
-			// cerr << enc.second[0] << endl;
+			write.write((char *) &(sz), sizeof(int32_t));
 			write.write((char *) enc.second.data(), enc.second.size());
 		}
-		delete data;
+		delete[] data;
 		read.close();
 		write.close();
 	}
@@ -73,15 +70,16 @@ int main(int argc, char ** argv)
 		huffman decode;
 		if (read.fail())
 		{
+			write.close();
 			throw runtime_error("SUCH FILE NOT FOUND");
 		}
 		uint32_t trSize = 0;
-		read.read((char *) &trSize, sizeof(uint32_t));
+		read.read((char *) &trSize, sizeof(int32_t));
 		for (size_t i = 0; i < trSize; ++i)
 		{
 			tree.push_back({0 , 0});
 			read.read((char *) &(tree[i].first), 1);
-			read.read((char *) &(tree[i].second), sizeof(uint32_t));
+			read.read((char *) &(tree[i].second), sizeof(int32_t));
 		}
 		decode.buildTree(tree);
 		uint8_t* data;
@@ -89,7 +87,7 @@ int main(int argc, char ** argv)
 		while(!read.eof())
 		{
 			uint32_t sz = 0;
-			read.read((char *) &(sz), sizeof(uint32_t));
+			read.read((char *) &(sz), sizeof(int32_t));
 			int vecSize = sz;
 			int unNeed = 0;
 			if (sz % 8 != 0)
@@ -102,7 +100,7 @@ int main(int argc, char ** argv)
 			res = decode.decode(data, vecSize, unNeed);
 			write.write((char *) res.data(), res.size());
 		}
-		delete data;
+		delete[] data;
 		read.close();
 		write.close();
 	}
