@@ -9,8 +9,8 @@
 struct weights
 {
 	weights();
-	weights(std::vector<std::pair<uint8_t, int>> res);
-	void addInfo(uint8_t* & a, int sz);
+	weights(std::vector<std::pair<uint8_t, int>> const& res);
+	void addInfo(const uint8_t* a, size_t sz);
 	std::vector<std::pair<uint8_t, int>> getTreeCode();
 	unsigned long long int number[256 * 2] = {};
 	static const int alphabetSize = 256;
@@ -18,7 +18,7 @@ struct weights
 struct huffman
 {
 public:
-	huffman(weights);
+	huffman(weights const&);
 	// huffman(std::vector<std::pair<uint8_t, int>> res);
 	// void buildTree();
 	// void buildTree(std::vector<std::pair<uint8_t, int>> res);
@@ -26,7 +26,6 @@ public:
 	std::vector<uint8_t> decode(uint8_t* & a, int sz, int unNeededBits);
 private:
 	static const int alphabetSize = 256;
-	bool hufTreeBuilt = false;
 	bool isRight[alphabetSize * 2] = {};
 	int leftSon[alphabetSize * 2] = {}, rightSon[alphabetSize * 2] = {};
 	int maxNode = alphabetSize - 1;

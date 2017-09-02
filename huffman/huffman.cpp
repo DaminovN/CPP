@@ -6,32 +6,33 @@
 #include<cstdio>
 #include "huflib.h"
 using namespace std;
-void weights::addInfo(uint8_t* & a, int sz)
+void weights::addInfo(const uint8_t* a, size_t sz)
 {
-	for (int i = 0; i < sz; ++i)
+	for (size_t i = 0; i < sz; ++i)
 	{
 		++number[a[i]];
 	}
 }
-huffman::huffman(weights rhs)
+huffman::huffman(weights const& rhs)
 {
-	hufTreeBuilt = true;
+	int number[alphabetSize * 2] = {};
+	std::copy(begin(rhs.number), end(rhs.number), number);
 	int first[alphabetSize] = {0};
 	for (int i = 0; i < alphabetSize; ++i)
 		first[i] = i;
-	sort(first, first + alphabetSize, [this, rhs](int a, int b) { return rhs.number[a] < rhs.number[b]; });
+	sort(first, first + alphabetSize, [this, &number](int a, int b) { return number[a] < number[b]; });
 	int second[alphabetSize] = {0};
 	int sz2 = 0;
 	int fPointer = 0, sPointer = 0;
 	int a, b;
 	while (alphabetSize - fPointer + sz2 - sPointer != 1)
 	{
-		if (fPointer < alphabetSize && rhs.number[first[fPointer]] == 0)
+		if (fPointer < alphabetSize && number[first[fPointer]] == 0)
 		{
 			++fPointer;
 			continue;
 		}
-		if (sPointer >= sz2 || (fPointer < alphabetSize && rhs.number[first[fPointer]] < rhs.number[second[sPointer]]))
+		if (sPointer >= sz2 || (fPointer < alphabetSize && number[first[fPointer]] < number[second[sPointer]]))
 		{
 			a = first[fPointer];
 			fPointer++;
@@ -41,7 +42,7 @@ huffman::huffman(weights rhs)
 			a = second[sPointer];
 			sPointer++;
 		}
-		if (sPointer >= sz2 || (fPointer < alphabetSize && rhs.number[first[fPointer]] < rhs.number[second[sPointer]]))
+		if (sPointer >= sz2 || (fPointer < alphabetSize && number[first[fPointer]] < number[second[sPointer]]))
 		{
 			b = first[fPointer];
 			fPointer++;
@@ -52,7 +53,7 @@ huffman::huffman(weights rhs)
 			sPointer++;
 		}
 		second[sz2++] = ++maxNode;
-		rhs.number[maxNode] = rhs.number[a] + rhs.number[b];
+		number[maxNode] = number[a] + number[b];
 		tPar[a] = tPar[b] = maxNode;
 		leftSon[maxNode] = a;
 		rightSon[maxNode] = b;
@@ -63,7 +64,7 @@ weights::weights()
 {
 
 }
-weights::weights(vector<pair<uint8_t, int>> res)
+weights::weights(vector<pair<uint8_t, int>> const& res)
 {
 	for (size_t i = 0; i < res.size(); ++i)
 	{
@@ -85,8 +86,6 @@ vector<pair<uint8_t, int>> weights::getTreeCode()
 }
 pair<int, vector<uint8_t>> huffman::encode(uint8_t* & a, int sz)
 {
-	// if (!hufTreeBuilt)
-	// 	buildTree();
 	vector<uint8_t> v;
 	int cnt = 0;
 	uint8_t val = 0;
