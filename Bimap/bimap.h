@@ -51,26 +51,26 @@ struct node
     friend node<S, SS>* getPrev_left(node<S, SS>* cur);
     template<typename S,typename SS>
     friend node<S, SS>* getPrev_right(node<S, SS>* cur);
-    template<typename S,typename SS>
-    friend void printTree(node<S, SS>* cur);
+    // template<typename S,typename SS>
+    // friend void printTree(node<S, SS>* cur);
     
 };
-template<typename T,typename TT>
-void printTree(node<T, TT>* cur)
-{
-    if (!cur)
-        return;
-    if (cur->left_left)
-    {
-        cout << cur->left_data << " LEFT " << (cur->left_left)->left_data << endl;
-    }
-    if (cur->left_right)
-    {
-        cout << cur->left_data << " RIGHT " << (cur->left_right)->left_data << endl;
-    }
-    printTree(cur->left_left);
-    printTree(cur->left_right);
-}
+// template<typename T,typename TT>
+// void printTree(node<T, TT>* cur)
+// {
+//     if (!cur)
+//         return;
+//     if (cur->left_left)
+//     {
+//         cout << cur->left_data << " LEFT " << (cur->left_left)->left_data << endl;
+//     }
+//     if (cur->left_right)
+//     {
+//         cout << cur->left_data << " RIGHT " << (cur->left_right)->left_data << endl;
+//     }
+//     printTree(cur->left_left);
+//     printTree(cur->left_right);
+// }
 template<typename T,typename TT>
 node<T, TT>* getNext_left(node<T, TT>* cur)
 {
