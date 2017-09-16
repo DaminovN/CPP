@@ -7,10 +7,6 @@
 
 
 
-struct endNode
-{
-
-};
 
 template<bool flag, typename T, typename TT>
 struct get_right_type;
