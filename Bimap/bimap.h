@@ -386,6 +386,12 @@ public:
     template<bool init_val>
     struct iterator
     {
+
+        typedef std::ptrdiff_t difference_type;
+        typedef typename get_right_type<init_val, T, TT>::type value_type;
+        typedef typename get_right_type<init_val, T, TT>::type const * pointer;
+        typedef typename get_right_type<init_val, T, TT>::type const & reference;
+        typedef std::bidirectional_iterator_tag iterator_category;
     	node<T, TT>* itData;
     	// bool type = init_val;
 
@@ -466,6 +472,10 @@ public:
         friend bool operator==(iterator const& lhs, iterator const& rhs)
         {
             return lhs.itData == rhs.itData;
+        }
+        friend bool operator!=(iterator const& lhs, iterator const& rhs)
+        {
+            return lhs.itData != rhs.itData;
         }
 
     };
