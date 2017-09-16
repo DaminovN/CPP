@@ -467,6 +467,10 @@ public:
 	    {
 	    	return iterator<init_val ^ 1> (itData);
 	    }
+        friend bool operator==(iterator const& lhs, iterator const& rhs)
+        {
+            return lhs.itData == rhs.itData;
+        }
 
     };
 
