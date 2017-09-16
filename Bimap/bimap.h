@@ -5,6 +5,13 @@
 
 // using namespace std;
 
+
+
+struct endNode
+{
+
+};
+
 template<bool flag, typename T, typename TT>
 struct get_right_type;
 
@@ -19,27 +26,19 @@ struct get_right_type<true, T, TT>
 {
 	typedef TT type;
 };
+
 template<typename T,typename TT>
 struct node
 {
-	typedef T left_t;
-	typedef TT right_t;
-    left_t  left_data;
     node<T, TT>*   left_left;
     node<T, TT>*   left_right;
     node<T, TT>*   left_parent;
 
-    right_t right_data;
     node<T, TT>*   right_left;
     node<T, TT>*   right_right;
     node<T, TT>*   right_parent;
 
-    bool isEnd;
-
-    node() : left_data(0), right_data(0), isEnd(0), left_left(nullptr), left_right(nullptr), left_parent(nullptr)
-                        , right_left(nullptr), right_right(nullptr), right_parent(nullptr) {}
-
-    node(left_t const& lhs, right_t const& rhs) : left_data(lhs), right_data(rhs), isEnd(false), left_left(nullptr), left_right(nullptr), left_parent(nullptr)
+    node() : left_left(nullptr), left_right(nullptr), left_parent(nullptr)
                         , right_left(nullptr), right_right(nullptr), right_parent(nullptr) {}
 
     //all are friend
@@ -52,8 +51,16 @@ struct node
     template<typename S,typename SS>
     friend node<S, SS>* getPrev_right(node<S, SS>* cur);
     // template<typename S,typename SS>
-    // friend void printTree(node<S, SS>* cur);
-    
+    // friend void printTree(node<S, SS>* cur); 
+};
+template<typename T, typename TT>
+struct vnode : public node<T, TT>
+{
+    typedef T left_t;
+    typedef TT right_t;
+    left_t  left_data;
+    right_t right_data;
+    vnode(left_t left, right_t right) : left_data(left), right_data(right) {}
 };
 // template<typename T,typename TT>
 // void printTree(node<T, TT>* cur)
@@ -71,10 +78,11 @@ struct node
 //     printTree(cur->left_left);
 //     printTree(cur->left_right);
 // }
+
 template<typename T,typename TT>
 node<T, TT>* getNext_left(node<T, TT>* cur)
 {
-	assert(cur->isEnd == false);
+	// assert(cur->isEnd == false);
 	if (!cur->left_right)
     {
 		while(cur->left_parent && (cur->left_parent)->left_right == cur)
@@ -92,7 +100,6 @@ node<T, TT>* getNext_left(node<T, TT>* cur)
 template<typename T,typename TT>
 node<T, TT>* getNext_right(node<T, TT>* cur)
 {
-	assert(cur->isEnd == false);
 	if (!cur->right_right)
     {
 		while(cur->right_parent && (cur->right_parent)->right_right == cur)
@@ -156,17 +163,9 @@ struct BST
     typedef TT right_t;
 
 	//DONE
-	BST()
-	{
-		root = new node<T, T>();
-		root->isEnd = true;
-	}
+	BST() : root(new node<T, TT>()) {}
 
-    ~BST()
-    {
-        // cout << "IN HEEEEEEEEEEEEEEEERE\n";
-        delete root;
-    }
+    ~BST() { }
 
 	//DONE
 	node<T, TT>* insert_left(node<T, TT>* root, node<T, TT>* it)
@@ -176,7 +175,7 @@ struct BST
     	{
     		return it;
     	}
-    	if (root->isEnd || it->left_data < root->left_data)
+    	if (static_cast<vnode<T, TT>*>(it)->left_data < static_cast<vnode<T, TT>*>(root)->left_data)
     	{
             // std:://cout << "HERE\n";
     		root->left_left = insert_left(root->left_left, it);
@@ -198,7 +197,7 @@ struct BST
     	{
     		return it;
     	}
-    	if (root->isEnd || it->right_data < root->right_data)
+    	if (static_cast<vnode<T, TT>*>(it)->right_data < static_cast<vnode<T, TT>*>(root)->right_data)
     	{
     		root->right_left = insert_right(root->right_left, it);
     		(root->right_left)->right_parent = root;
@@ -223,16 +222,9 @@ struct BST
         // }
     	if (!root)
     		return nullptr;
-    	else if (root->isEnd)
-    	{
-    		node<T, TT>* tmp = check_left(root->left_left, val);
-    		if (tmp)
-    			return tmp;
-    		return root;
-    	}
-    	else if (root->left_data > val)
+    	if (static_cast<vnode<T, TT>*>(root)->left_data > val)
     		return check_left(root->left_left, val);
-    	else if (root->left_data < val)
+    	else if (static_cast<vnode<T, TT>*>(root)->left_data < val)
     		return check_left(root->left_right, val);
     	else 
     		return root;
@@ -242,16 +234,9 @@ struct BST
     {
     	if (!root)
     		return nullptr;
-    	else if (root->isEnd)
-    	{
-    		node<T, TT>* tmp = check_right(root->right_left, val);
-    		if (tmp)
-    			return tmp;
-    		return root;
-    	}
-    	else if (root->right_data > val)
+    	if (static_cast<vnode<T, TT>*>(root)->right_data > val)
     		return check_right(root->right_left, val);
-    	else if (root->right_data < val)
+    	else if (static_cast<vnode<T, TT>*>(root)->right_data < val)
     		return check_right(root->right_right, val);
     	else 
     		return root;
@@ -259,26 +244,32 @@ struct BST
     //DONE
     node<T, TT>* insert(left_t const& lhs, right_t const& rhs)
     {
-    	if (check_left(root, lhs)->isEnd != true || check_right(root, rhs)->isEnd != true)
+        if (root->left_left == nullptr)
+        {
+            node<T, TT>* it = new vnode<T, TT>(lhs, rhs);
+            root->left_left = it;
+            root->right_left = it;
+            it->left_parent = root;
+            it->right_parent = root;
+            return it;
+        }
+    	if (check_left(root->left_left, lhs) != nullptr || check_right(root->right_left, rhs) != nullptr)
     		return root;
         // cout << "HERE\n";
-    	node<T, TT>* it = new node<T, TT>(lhs, rhs);
+    	node<T, TT>* it = new vnode<T, TT>(lhs, rhs);
         // std:://cout << "START INSERT\n";
-    	root = insert_left(root, it);
+    	root->left_left = insert_left(root->left_left, it);
         // std:://cout<< "RIGHT\n";
-    	root = insert_right(root, it);
+    	root->right_left = insert_right(root->right_left, it);
     	return it;
     }
     //DONE
     void erase_left(node<T, TT>* val)
     {
-    	assert(val->isEnd == false);
-        // cerr << "HERE\n";
-		if (val->left_left && val->left_right)
+     	if (val->left_left && val->left_right)
 		{
 			node<T, TT>* left = val->left_left;
 			node<T, TT>* right = val->left_right;
-			node<T, TT>* par = val->left_parent;
 			node<T, TT>* temp = val;
 			temp = getPrev_left(temp);
 			if ((val->left_parent)->left_left == val)
@@ -292,7 +283,6 @@ struct BST
 		else if (val->left_left)
 		{
 			node<T, TT>* left = val->left_left;
-			node<T, TT>* par = val->left_parent;
 			if ((val->left_parent)->left_left == val)
 				(val->left_parent)->left_left = left;
 			else 
@@ -302,7 +292,6 @@ struct BST
 		else if (val->left_right)
 		{
 			node<T, TT>* right = val->left_right;
-			node<T, TT>* par = val->left_parent;
 			if ((val->left_parent)->left_left == val)
 				(val->left_parent)->left_left = right;
 			else 
@@ -311,6 +300,7 @@ struct BST
 		}
         else 
         {
+            // std::cout << "HERE@!\n";
             if ((val->left_parent)->left_left == val)
                 (val->left_parent)->left_left = nullptr;
             else 
@@ -320,12 +310,10 @@ struct BST
     //DONE
     void erase_right(node<T, TT>* val)
     {
-    	assert(val->isEnd == false);
 		if (val->right_left && val->left_right)
 		{
 			node<T, TT>* left = val->right_left;
 			node<T, TT>* right = val->right_right;
-			node<T, TT>* par = val->right_parent;
 			node<T, TT>* temp = val;
 			temp = getPrev_right(temp);
 			if ((val->right_parent)->right_left == val)
@@ -339,7 +327,6 @@ struct BST
 		else if (val->right_left)
 		{
 			node<T, TT>* left = val->right_left;
-			node<T, TT>* par = val->right_parent;
 			if ((val->right_parent)->right_left == val)
 				(val->right_parent)->right_left = left;
 			else 
@@ -349,7 +336,6 @@ struct BST
 		else if (val->right_right)
 		{
 			node<T, TT>* right = val->right_right;
-			node<T, TT>* par = val->right_parent;
 			if ((val->right_parent)->right_left == val)
 				(val->right_parent)->right_left = right;
 			else 
@@ -363,21 +349,18 @@ struct BST
             else 
                 (val->right_parent)->right_right = nullptr;
         }
-        //cout << "HERE\n";
-        //cout << val->left_data << endl;
 		delete val;
-        // if (val)
-            //cout << "HOLLY SHIT\n";
     }
     //DONE
     void erase(node<T, TT>* val)
     {
         // cerr << "HERE\n";
-        assert(val != nullptr);
         // cerr << "GOIND IN TO ERASE_LEFT\n";
         // if (root->left_left == val)
             //cout << "ISLEFT\n";
+        // std::cout << "HERE\n";
         erase_left(val);
+        // std::cout << "HERE\n";
         erase_right(val);
         //cout << val->left_data << endl;
         // if (root->left_left)
@@ -419,9 +402,9 @@ public:
 		typename get_right_type<init_val, T, TT>::type const& operator*() const
     	{
     		if (!init_val)
-    			return itData->left_data;
+    			return static_cast<vnode<T, TT>*>(itData)->left_data;
     		else 
-    			return itData->right_data;
+    			return static_cast<vnode<T, TT>*>(itData)->right_data;
     	}
 
 	    // Переход к следующему по величине left'у.
@@ -493,9 +476,9 @@ public:
     typedef iterator<true> right_iterator;
 
     // Создает bimap не содержащий ни одной пары.
-    bimap()
+    bimap() : data(new BST<T, TT>())
     {
-    	data = new BST<T, TT>();
+    	// data = new BST<T, TT>();
     }
 
     // Деструктор. Вызывается при удалении объектов bimap.
@@ -504,12 +487,12 @@ public:
     ~bimap()
     {
         // std:://cout << "DESTRUCTOR\n";
-    	while (*begin_left() && false/*!(begin_left().equals(end_left()))*/)
+        // std::cout << (begin_left().equals(end_left())) << "\n";
+    	while (!(begin_left().equals(end_left())))
     	{
             // cout << "WORKING " << *begin_left() << "\n";
     		erase(begin_left());
     	}
-    	delete data;
     }
 
     // Вставка пары (left, right), возвращает итератор на left.
@@ -527,7 +510,7 @@ public:
     // erase инвалидирует все итераторы ссылающиеся на e и на элемент парный к e.
     void erase(left_iterator it)
     {
-    	assert(it.itData);
+    	// assert(it.itData);
     	data->erase(it.itData);
     }
     void erase(right_iterator it)
@@ -550,9 +533,9 @@ public:
     // Возващает итератор на минимальный по величине left.
     left_iterator begin_left() const
     {
+        // std::cout << "HERE\n";
+        // if (!data)
     	node<T, TT>* tmp = data->root;
-        // if (tmp->left_left)
-            //cout << "FOUND SHIT\n";
     	while (tmp->left_left)
     		tmp = tmp->left_left;
         // std:://cout << "returning begin_left " << tmp->left_data << "\n";

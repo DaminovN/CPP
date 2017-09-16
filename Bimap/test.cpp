@@ -1,64 +1,23 @@
 #include <bits/stdc++.h>
 #include <cstddef>
 using namespace std;
-template<typename T,typename TT>
-struct node
+struct X
 {
-	typedef T left_t;
-	typedef TT right_t;
-    left_t  left_data;
-    node<T, TT>*   left_left;
-    node<T, TT>*   left_right;
-    node<T, TT>*   left_parent;
-
-    right_t right_data;
-    node<T, TT>*   right_left;
-    node<T, TT>*   right_right;
-    node<T, TT>*   right_parent;
-
-    bool isEnd;
-    node() {}
+    int a;
+    X() {}
 };
-template<typename T,typename TT>
-struct BST
+struct B
 {
-	node<T, TT>* root;
+    X q;
+    B() {}
+    ~B() {
 
-	typedef T left_t;
-    typedef TT right_t;
-    BST()
-	{
-		root = new node<T, T>();
-		root->isEnd = true;
-	}
-
-    ~BST()
-    {
-        delete root;
-    }
-};
-template<typename T,typename TT>
-struct bimap
-{
-    // Вы можете определить эти тайпдефы по вашему усмотрению.
-    typedef T left_t;
-    typedef TT right_t;
-// private:
-	BST<left_t, right_t>* data;
-	bimap()
-    {
-    	data = new BST<T, TT>();
-    }
-    ~bimap()
-    {
-        cout << data->root->left_data << endl;
-    	delete data;
+        cout << q.a << endl;
     }
 };
 int main()
 {
-	bimap<int, int> a;
-	
+    B f;
 	return 0;
 }
 
