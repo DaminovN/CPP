@@ -3,7 +3,7 @@
 
 #include <bits/stdc++.h>
 
-using namespace std;
+// using namespace std;
 
 template<bool flag, typename T, typename TT>
 struct get_right_type;
@@ -36,11 +36,11 @@ struct node
 
     bool isEnd;
 
-    node() : left_data(0), right_data(0), isEnd(0), left_left(NULL), left_right(NULL), left_parent(NULL)
-                        , right_left(NULL), right_right(NULL), right_parent(NULL) {}
+    node() : left_data(0), right_data(0), isEnd(0), left_left(nullptr), left_right(nullptr), left_parent(nullptr)
+                        , right_left(nullptr), right_right(nullptr), right_parent(nullptr) {}
 
-    node(left_t const& lhs, right_t const& rhs) : left_data(lhs), right_data(rhs), isEnd(false), left_left(NULL), left_right(NULL), left_parent(NULL)
-                        , right_left(NULL), right_right(NULL), right_parent(NULL) {}
+    node(left_t const& lhs, right_t const& rhs) : left_data(lhs), right_data(rhs), isEnd(false), left_left(nullptr), left_right(nullptr), left_parent(nullptr)
+                        , right_left(nullptr), right_right(nullptr), right_parent(nullptr) {}
 
     //all are friend
     template<typename S,typename SS>
@@ -222,7 +222,7 @@ struct BST
         //         std:://cout << root->left_data << "\n";
         // }
     	if (!root)
-    		return NULL;
+    		return nullptr;
     	else if (root->isEnd)
     	{
     		node<T, TT>* tmp = check_left(root->left_left, val);
@@ -241,7 +241,7 @@ struct BST
     node<T, TT>* check_right(node<T, TT>* root, right_t const& val) const
     {
     	if (!root)
-    		return NULL;
+    		return nullptr;
     	else if (root->isEnd)
     	{
     		node<T, TT>* tmp = check_right(root->right_left, val);
@@ -261,7 +261,7 @@ struct BST
     {
     	if (check_left(root, lhs)->isEnd != true || check_right(root, rhs)->isEnd != true)
     		return root;
-        cout << "HERE\n";
+        // cout << "HERE\n";
     	node<T, TT>* it = new node<T, TT>(lhs, rhs);
         // std:://cout << "START INSERT\n";
     	root = insert_left(root, it);
@@ -312,9 +312,9 @@ struct BST
         else 
         {
             if ((val->left_parent)->left_left == val)
-                (val->left_parent)->left_left = NULL;
+                (val->left_parent)->left_left = nullptr;
             else 
-                (val->left_parent)->left_right = NULL;
+                (val->left_parent)->left_right = nullptr;
         }
     }
     //DONE
@@ -359,9 +359,9 @@ struct BST
         else 
         {
             if ((val->right_parent)->right_left == val)
-                (val->right_parent)->right_left = NULL;
+                (val->right_parent)->right_left = nullptr;
             else 
-                (val->right_parent)->right_right = NULL;
+                (val->right_parent)->right_right = nullptr;
         }
         //cout << "HERE\n";
         //cout << val->left_data << endl;
@@ -373,7 +373,7 @@ struct BST
     void erase(node<T, TT>* val)
     {
         // cerr << "HERE\n";
-        assert(val != NULL);
+        assert(val != nullptr);
         // cerr << "GOIND IN TO ERASE_LEFT\n";
         // if (root->left_left == val)
             //cout << "ISLEFT\n";
