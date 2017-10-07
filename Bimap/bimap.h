@@ -305,11 +305,12 @@ struct BST
             else 
                 (val->left_parent)->left_right = nullptr;
         }
+        // std::cerr << "HERE\n";
     }
     //DONE
     void erase_right(node<T, TT>* val)
     {
-		if (val->right_left && val->left_right)
+		if (val->right_left && val->right_right)
 		{
 			node<T, TT>* left = val->right_left;
 			node<T, TT>* right = val->right_right;
@@ -348,6 +349,7 @@ struct BST
             else 
                 (val->right_parent)->right_right = nullptr;
         }
+        // std::cerr << "HERE\n";
 		delete val;
     }
     //DONE

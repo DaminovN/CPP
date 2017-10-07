@@ -19,16 +19,19 @@ void expect_eq(int a, int b)
 int main()
 {
 	m.insert(5 ,5);
-	m.insert(3, 4);
-	m.insert(5, 6);
-	expect_eq(1, 2);
-	expect_eq(3, 4);
-	expect_eq(5, 6);
-	cout << (m.find_left(2) == m.end_left()) << endl;
-	cout << (m.find_left(4) == m.end_left()) << endl;
+	m.insert(3, 6);
+	m.insert(2, 8);
+	m.insert(4, 4);
+	m.insert(7, 3);
+	m.insert(6, 7);
+	m.insert(8, 9);
 
-	cout << (m.find_right(1) == m.end_right()) << endl;
-	cout << (m.find_right(3) == m.end_right()) << endl;
-	cout << (m.find_right(5) == m.end_right()) << endl;
+	expect_eq(5 ,5);
+	expect_eq(3, 6);
+	expect_eq(2, 8);
+	expect_eq(4, 4);
+	expect_eq(7, 3);
+	expect_eq(6, 7);
+	expect_eq(8, 9);
 	return 0;
 }
