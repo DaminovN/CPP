@@ -382,80 +382,70 @@ struct bimap
 	BST<left_t, right_t>* data;
 
 
-public:
-    template<bool init_val>
-    struct iterator
+// public:
+//     template<bool init_val>
+    struct right_iterator;
+
+    struct left_iterator
     {
 
         typedef std::ptrdiff_t difference_type;
-        typedef typename get_right_type<init_val, T, TT>::type value_type;
-        typedef typename get_right_type<init_val, T, TT>::type const * pointer;
-        typedef typename get_right_type<init_val, T, TT>::type const & reference;
+        typedef T value_type;
+        typedef T const * pointer;
+        typedef T const & reference;
         typedef std::bidirectional_iterator_tag iterator_category;
     	node<T, TT>* itData;
-    	// bool type = init_val;
 
-    	iterator() {}
-    	iterator(node<T, TT>* _data): itData(_data) {}
+    	left_iterator() {}
+    	left_iterator(node<T, TT>* _data): itData(_data) {}
     	// iterator(iterator<init_val> const& _data) : itData(_data.idData) {}
 	    // Элемент на который сейчас ссылается итератор.
 	    // Разыменование итератора end_left() неопределено.
 	    // Разыменование невалидного итератора неопределено.
-		typename get_right_type<init_val, T, TT>::type const& operator*() const
+		T const& operator*() const
     	{
-    		if (!init_val)
     			return static_cast<vnode<T, TT>*>(itData)->left_data;
-    		else 
-    			return static_cast<vnode<T, TT>*>(itData)->right_data;
     	}
 
 	    // Переход к следующему по величине left'у.
 	    // Инкремент итератора end_left() неопределен.
 	    // Инкремент невалидного итератора неопределен.
 
-    	iterator& operator++()
+    	left_iterator& operator++()
 	    {
-	    	if (!init_val)
 	    		itData = getNext_left(itData);
-	    	else 
-	    		itData = getNext_right(itData);
 	    	return (*this);
 	    }
 
-	    iterator operator++(int)
+	    left_iterator operator++(int)
 	    {
-	    	iterator<init_val> it2 = (*this);
+	    	left_iterator it2 = (*this);
 	    	++(*this);
 	    	return it2;
 	    }
 
-        iterator& operator=(iterator const& rhs)
+        left_iterator& operator=(left_iterator const& rhs)
         {
-            iterator<init_val> it2 = (*this);
-            ++(*this);
-            return it2;
+            itData = rhs.itData;
+            return (*this);
         }
 
 
 	    // Переход к предыдущему по величине left'у.
 	    // Декремент итератора begin_left() неопределен.
 	    // Декремент невалидного итератора неопределен.
-	    iterator& operator--()
+	    left_iterator& operator--()
 	    {
-            // cout << "in to --\n";
-	    	if (!init_val)
 	    		itData = getPrev_left(itData);
-	    	else 
-	    		itData = getPrev_right(itData);
 	    	return (*this);
 	    }
-	    iterator operator--(int)
+	    left_iterator operator--(int)
 	    {
-	    	iterator<init_val> it2 = (*this);
+	    	left_iterator it2 = (*this);
 	    	--(*this);
 	    	return it2;
 	    }
-	    bool equals(iterator<init_val> const& it) const
+	    bool equals(left_iterator const& it) const
 	    {
             // std:://cout << itData->isEnd << " " << (it.itData)->isEnd << "\n";
 	    	return (itData == it.itData);
@@ -465,25 +455,104 @@ public:
 	    // end_left().flip() возращает end_right().
 	    // end_right().flip() возвращает end_left().
 	    // flip() невалидного итератора неопределен.
-	    iterator<init_val ^ 1> flip() const
+	    right_iterator flip() const
 	    {
-	    	return iterator<init_val ^ 1> (itData);
+	    	return right_iterator(itData);
 	    }
-        friend bool operator==(iterator const& lhs, iterator const& rhs)
+        friend bool operator==(left_iterator const& lhs, left_iterator const& rhs)
         {
             return lhs.itData == rhs.itData;
         }
-        friend bool operator!=(iterator const& lhs, iterator const& rhs)
+        friend bool operator!=(left_iterator const& lhs, left_iterator const& rhs)
         {
             return lhs.itData != rhs.itData;
         }
 
     };
 
+    struct right_iterator
+    {
+
+        typedef std::ptrdiff_t difference_type;
+        typedef TT value_type;
+        typedef TT const * pointer;
+        typedef TT const & reference;
+        typedef std::bidirectional_iterator_tag iterator_category;
+        node<T, TT>* itData;
+
+        right_iterator() {}
+        right_iterator(node<T, TT>* _data): itData(_data) {}
+        // iterator(iterator<init_val> const& _data) : itData(_data.idData) {}
+        // Элемент на который сейчас ссылается итератор.
+        // Разыменование итератора end_left() неопределено.
+        // Разыменование невалидного итератора неопределено.
+        TT const& operator*() const
+        {
+             return static_cast<vnode<T, TT>*>(itData)->right_data;
+        }
+
+        // Переход к следующему по величине left'у.
+        // Инкремент итератора end_left() неопределен.
+        // Инкремент невалидного итератора неопределен.
+
+        right_iterator& operator++()
+        {
+                itData = getNext_right(itData);
+            return (*this);
+        }
+
+        right_iterator operator++(int)
+        {
+            right_iterator it2 = (*this);
+            ++(*this);
+            return it2;
+        }
+
+        right_iterator& operator=(right_iterator const& rhs)
+        {
+            itData = rhs.itData;
+            return (*this);
+        }
 
 
-    typedef iterator<false> left_iterator;
-    typedef iterator<true> right_iterator;
+        // Переход к предыдущему по величине left'у.
+        // Декремент итератора begin_left() неопределен.
+        // Декремент невалидного итератора неопределен.
+        right_iterator& operator--()
+        {
+                itData = getPrev_right(itData);
+            return (*this);
+        }
+        right_iterator operator--(int)
+        {
+            right_iterator it2 = (*this);
+            --(*this);
+            return it2;
+        }
+        bool equals(right_iterator const& it) const
+        {
+            // std:://cout << itData->isEnd << " " << (it.itData)->isEnd << "\n";
+            return (itData == it.itData);
+        }
+        // left_iterator ссылается на левый элемент некоторой пары.
+        // Эта функция возвращает итератор на правый элемент той же пары.
+        // end_left().flip() возращает end_right().
+        // end_right().flip() возвращает end_left().
+        // flip() невалидного итератора неопределен.
+        left_iterator flip() const
+        {
+            return left_iterator(itData);
+        }
+        friend bool operator==(right_iterator const& lhs, right_iterator const& rhs)
+        {
+            return lhs.itData == rhs.itData;
+        }
+        friend bool operator!=(right_iterator const& lhs, right_iterator const& rhs)
+        {
+            return lhs.itData != rhs.itData;
+        }
+
+    };
 
     // Создает bimap не содержащий ни одной пары.
     bimap() : data(new BST<T, TT>())

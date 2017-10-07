@@ -7,9 +7,8 @@ using namespace std;
 
 int main()
 {
-	bimap<int, int> m;
-	// bimap<int, int> m2 = m;
-	int x;
-	int y = y;
+	bimap<int, string> m;
+	m.insert(1, "kek");
+	cout << *(m.begin_left().flip()) << endl;
 	return 0;
 }
