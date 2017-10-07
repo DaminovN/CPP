@@ -161,7 +161,10 @@ struct BST
 	//DONE
 	BST() : root(new node<T, TT>()) {}
 
-    ~BST() { }
+    ~BST()
+    {
+        delete root;
+    }
 
 	//DONE
 	node<T, TT>* insert_left(node<T, TT>* root, node<T, TT>* it)
@@ -251,11 +254,11 @@ struct BST
         }
     	if (check_left(root->left_left, lhs) != nullptr || check_right(root->right_left, rhs) != nullptr)
     		return root;
-        // cout << "HERE\n";
+        // std::cout << "HERE\n";
     	node<T, TT>* it = new vnode<T, TT>(lhs, rhs);
-        // std:://cout << "START INSERT\n";
+        // std::cout << "START INSERT\n";
     	root->left_left = insert_left(root->left_left, it);
-        // std:://cout<< "RIGHT\n";
+        // std::cout<< "RIGHT\n";
     	root->right_left = insert_right(root->right_left, it);
     	return it;
     }
@@ -573,9 +576,11 @@ struct bimap
         // std::cout << (begin_left().equals(end_left())) << "\n";
     	while (!(begin_left().equals(end_left())))
     	{
-            // cout << "WORKING " << *begin_left() << "\n";
+
     		erase(begin_left());
     	}
+        delete data;
+        // erase(end_left());
     }
 
     // Вставка пары (left, right), возвращает итератор на left.
@@ -606,11 +611,11 @@ struct bimap
     // end_left()/end_right() соответственно.
     left_iterator  find_left (left_t  const& left)  const
     {
-    	return left_iterator(data->check_left(data->root, left));
+    	return left_iterator(data->check_left(data->root->left_left, left));
     }
     right_iterator find_right(right_t const& right) const
     {
-    	return right_iterator(data->check_right(data->root, right));
+    	return right_iterator(data->check_right(data->root->right_left, right));
     }
 
     // Возващает итератор на минимальный по величине left.

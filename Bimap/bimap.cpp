@@ -7,8 +7,12 @@ using namespace std;
 
 int main()
 {
-	bimap<int, string> m;
-	m.insert(1, "kek");
-	cout << *(m.begin_left().flip()) << endl;
+	bimap<int, int> m;
+	m.insert(1, 2);
+	auto i = m.find_left(1);
+	cout << (i == m.end_left()) << endl;
+	cout << *i << endl;
+	cout << (*i == 1) << endl;
+	cout << (*(i.flip()) == 2) << endl;
 	return 0;
 }
