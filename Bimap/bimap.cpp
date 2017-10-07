@@ -18,20 +18,11 @@ void expect_eq(int a, int b)
 
 int main()
 {
-	m.insert(5 ,5);
-	m.insert(3, 6);
-	m.insert(2, 8);
-	m.insert(4, 4);
-	m.insert(7, 3);
-	m.insert(6, 7);
-	m.insert(8, 9);
-
-	expect_eq(5 ,5);
-	expect_eq(3, 6);
-	expect_eq(2, 8);
-	expect_eq(4, 4);
-	expect_eq(7, 3);
-	expect_eq(6, 7);
-	expect_eq(8, 9);
+	bimap<int, int>::left_iterator i = m.insert(2, 20);
+	m.insert(1, 30);
+	m.insert(3, 10);
+	cout << (2 == *i) << endl;
+	cout << (20 == *(i.flip())) << endl;
+	cout << (std::prev(i).flip() == std::next(i.flip())) << endl;
 	return 0;
 }
