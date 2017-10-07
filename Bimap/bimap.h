@@ -611,11 +611,19 @@ struct bimap
     // end_left()/end_right() соответственно.
     left_iterator  find_left (left_t  const& left)  const
     {
-    	return left_iterator(data->check_left(data->root->left_left, left));
+        node<T, TT>* ans;
+        ans = data->check_left(data->root->left_left, left);
+        if (ans == nullptr)
+            ans = data->root;
+    	return left_iterator(ans);
     }
     right_iterator find_right(right_t const& right) const
     {
-    	return right_iterator(data->check_right(data->root->right_left, right));
+        node<T, TT>* ans;
+        ans = data->check_right(data->root->right_left, right);
+        if (ans == nullptr)
+            ans = data->root;
+    	return right_iterator(ans);
     }
 
     // Возващает итератор на минимальный по величине left.
