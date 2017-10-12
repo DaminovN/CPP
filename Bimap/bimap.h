@@ -3,43 +3,31 @@
 
 #include <bits/stdc++.h>
 
-// using namespace std;
-
-
-
-
 template<bool flag, typename T, typename TT>
 struct get_right_type;
-
 template<typename T, typename TT>
 struct get_right_type<false, T, TT>
 {
 	typedef T type;
 };
-
 template<typename T, typename TT>
 struct get_right_type<true, T, TT>
 {
 	typedef TT type;
 };
-
 template<typename T,typename TT>
 struct node
 {
-    node<T, TT>*   left_left;
-    node<T, TT>*   left_right;
-    node<T, TT>*   left_parent;
-
-    node<T, TT>*   right_left;
-    node<T, TT>*   right_right;
-    node<T, TT>*   right_parent;
-
+    node<T, TT>* left_left;
+    node<T, TT>* left_right;
+    node<T, TT>* left_parent;
+    node<T, TT>* right_left;
+    node<T, TT>* right_right;
+    node<T, TT>* right_parent;
     node() : left_left(nullptr), left_right(nullptr), left_parent(nullptr)
                         , right_left(nullptr), right_right(nullptr), right_parent(nullptr) {}
 
     virtual ~node() {}
-
-    //all are friend
     template<typename S,typename SS>
     friend node<S, SS>* getNext_left(node<S, SS>* cur);
     template<typename S,typename SS>
@@ -48,40 +36,21 @@ struct node
     friend node<S, SS>* getPrev_left(node<S, SS>* cur);
     template<typename S,typename SS>
     friend node<S, SS>* getPrev_right(node<S, SS>* cur);
-    // template<typename S,typename SS>
-    // friend void printTree(node<S, SS>* cur); 
 };
 template<typename T, typename TT>
 struct vnode : public node<T, TT>
 {
     typedef T left_t;
     typedef TT right_t;
-    left_t  left_data;
+    left_t left_data;
     right_t right_data;
     vnode(left_t left, right_t right) : left_data(left), right_data(right) {}
     ~vnode() {}
 };
-// template<typename T,typename TT>
-// void printTree(node<T, TT>* cur)
-// {
-//     if (!cur)
-//         return;
-//     if (cur->left_left)
-//     {
-//         cout << cur->left_data << " LEFT " << (cur->left_left)->left_data << endl;
-//     }
-//     if (cur->left_right)
-//     {
-//         cout << cur->left_data << " RIGHT " << (cur->left_right)->left_data << endl;
-//     }
-//     printTree(cur->left_left);
-//     printTree(cur->left_right);
-// }
 
 template<typename T,typename TT>
 node<T, TT>* getNext_left(node<T, TT>* cur)
 {
-	// assert(cur->isEnd == false);
 	if (!cur->left_right)
     {
 		while(cur->left_parent && (cur->left_parent)->left_right == cur)
@@ -116,9 +85,6 @@ node<T, TT>* getNext_right(node<T, TT>* cur)
 template<typename T,typename TT>
 node<T, TT>* getPrev_left(node<T, TT>* cur)
 {
-    // cout << "INHERE" << " " << cur->left_data << endl;
-    // if (cur->left_left)
-    //     cout << "CAN\n";
 	if (!cur->left_left)
 	{
         while(cur->left_parent && (cur->left_parent)->left_left == cur)
@@ -131,7 +97,6 @@ node<T, TT>* getPrev_left(node<T, TT>* cur)
 		while(cur->left_right)
 			cur = cur->left_right;
 	}
-    // cout << "OUTHERE" << " " << cur->left_data << endl;
 	return cur;
 }
 template<typename T,typename TT>
@@ -151,8 +116,6 @@ node<T, TT>* getPrev_right(node<T, TT>* cur)
 	}
 	return cur;
 }
-
-
 template<typename T, typename TT>
 struct BST
 {
@@ -160,28 +123,21 @@ struct BST
 	typedef T left_t;
     typedef TT right_t;
 
-	//DONE
 	BST() : root(new node<T, TT>()) {}
-
     ~BST()
     {
         delete root;
     }
-
-	//DONE
 	node<T, TT>* insert_left(node<T, TT>* root, node<T, TT>* it)
     {
-        // std:://cout << root->left_data << "\n";
     	if (!root)
     	{
     		return it;
     	}
     	if (static_cast<vnode<T, TT>*>(it)->left_data < static_cast<vnode<T, TT>*>(root)->left_data)
     	{
-            // std:://cout << "HERE\n";
-    		root->left_left = insert_left(root->left_left, it);
-
-    		(root->left_left)->left_parent = root;
+            root->left_left = insert_left(root->left_left, it);
+            (root->left_left)->left_parent = root;
             return root;
     	}
     	else 
@@ -191,7 +147,6 @@ struct BST
             return root;
     	}
     }
-    //DONE
     node<T, TT>* insert_right(node<T, TT>* root, node<T, TT>* it)
     {
     	if (!root)
@@ -211,16 +166,8 @@ struct BST
             return root;
     	}
     }
-    //DONE
     node<T, TT>* check_left(node<T, TT>* root, left_t const& val) const
     {
-        // if (root)
-        // {
-        //     if (root->isEnd)
-        //         std:://cout << "END\n";
-        //     else 
-        //         std:://cout << root->left_data << "\n";
-        // }
     	if (!root)
     		return nullptr;
     	if (static_cast<vnode<T, TT>*>(root)->left_data > val)
@@ -230,7 +177,6 @@ struct BST
     	else 
     		return root;
     }
-    //DONE
     node<T, TT>* check_right(node<T, TT>* root, right_t const& val) const
     {
     	if (!root)
@@ -242,30 +188,24 @@ struct BST
     	else 
     		return root;
     }
-    //DONE
     node<T, TT>* insert(left_t const& lhs, right_t const& rhs)
     {
         if (root->left_left == nullptr)
         {
-            // std::cerr << "HERE\n";
             node<T, TT>* it = new vnode<T, TT>(lhs, rhs);
             root->left_left = it;
             root->right_left = it;
             it->left_parent = root;
             it->right_parent = root;
-            // cerr << "INSERT "
             return it;
         }
     	if (check_left(root->left_left, lhs) != nullptr || check_right(root->right_left, rhs) != nullptr)
     		return root;
     	node<T, TT>* it = new vnode<T, TT>(lhs, rhs);
-        // std::cout << "START INSERT\n";
     	root->left_left = insert_left(root->left_left, it);
-        // std::cout<< "RIGHT\n";
     	root->right_left = insert_right(root->right_left, it);
     	return it;
     }
-    //DONE
     void erase_left(node<T, TT>* val)
     {
      	if (val->left_left && val->left_right)
@@ -302,15 +242,12 @@ struct BST
 		}
         else 
         {
-            // std::cout << "HERE@!\n";
             if ((val->left_parent)->left_left == val)
                 (val->left_parent)->left_left = nullptr;
             else 
                 (val->left_parent)->left_right = nullptr;
         }
-        // std::cerr << "HERE\n";
     }
-    //DONE
     void erase_right(node<T, TT>* val)
     {
 		if (val->right_left && val->right_right)
@@ -354,47 +291,24 @@ struct BST
         }
 		delete val;
     }
-
     void erase(node<T, TT>* val)
     {
-        // cerr << "HERE\n";
-        // cerr << "GOIND IN TO ERASE_LEFT\n";
-        // if (root->left_left == val)
-            //cout << "ISLEFT\n";
-        // std::cout << "HERE\n";
         erase_left(val);
-        // std::cout << "HERE\n";
         erase_right(val);
-        //cout << val->left_data << endl;
-        // if (root->left_left)
-        //     //cout << "NOT ERASED\n";
-        // if (val)
-            //cout << "NOT ERASED\n";
     }
-
 };
-
-
-
-
-
 
 template <typename T, typename TT>
 struct bimap
 {
-    // Вы можете определить эти тайпдефы по вашему усмотрению.
     typedef T left_t;
     typedef TT right_t;
-// private:
 	BST<left_t, right_t>* data;
 
-// public:
-//     template<bool init_val>
     struct right_iterator;
 
     struct left_iterator
     {
-
         typedef std::ptrdiff_t difference_type;
         typedef T value_type;
         typedef T const * pointer;
@@ -404,42 +318,26 @@ struct bimap
 
     	left_iterator() {}
     	left_iterator(node<T, TT>* _data): itData(_data) {}
-    	// iterator(iterator<init_val> const& _data) : itData(_data.idData) {}
-	    // Элемент на который сейчас ссылается итератор.
-	    // Разыменование итератора end_left() неопределено.
-	    // Разыменование невалидного итератора неопределено.
 		T const& operator*() const
     	{
     			return static_cast<vnode<T, TT>*>(itData)->left_data;
     	}
-
-	    // Переход к следующему по величине left'у.
-	    // Инкремент итератора end_left() неопределен.
-	    // Инкремент невалидного итератора неопределен.
-
     	left_iterator& operator++()
 	    {
 	    		itData = getNext_left(itData);
 	    	return (*this);
 	    }
-
 	    left_iterator operator++(int)
 	    {
 	    	left_iterator it2 = (*this);
 	    	++(*this);
 	    	return it2;
 	    }
-
         left_iterator& operator=(left_iterator const& rhs)
         {
             itData = rhs.itData;
             return (*this);
         }
-
-
-	    // Переход к предыдущему по величине left'у.
-	    // Декремент итератора begin_left() неопределен.
-	    // Декремент невалидного итератора неопределен.
 	    left_iterator& operator--()
 	    {
 	    		itData = getPrev_left(itData);
@@ -451,16 +349,6 @@ struct bimap
 	    	--(*this);
 	    	return it2;
 	    }
-	    bool equals(left_iterator const& it) const
-	    {
-            // std:://cout << itData->isEnd << " " << (it.itData)->isEnd << "\n";
-	    	return (itData == it.itData);
-	    }
-	    // left_iterator ссылается на левый элемент некоторой пары.
-	    // Эта функция возвращает итератор на правый элемент той же пары.
-	    // end_left().flip() возращает end_right().
-	    // end_right().flip() возвращает end_left().
-	    // flip() невалидного итератора неопределен.
 	    right_iterator flip() const
 	    {
 	    	return right_iterator(itData);
@@ -473,12 +361,10 @@ struct bimap
         {
             return lhs.itData != rhs.itData;
         }
-
     };
 
     struct right_iterator
     {
-
         typedef std::ptrdiff_t difference_type;
         typedef TT value_type;
         typedef TT const * pointer;
@@ -488,45 +374,29 @@ struct bimap
 
         right_iterator() {}
         right_iterator(node<T, TT>* _data): itData(_data) {}
-        // iterator(iterator<init_val> const& _data) : itData(_data.idData) {}
-        // Элемент на который сейчас ссылается итератор.
-        // Разыменование итератора end_left() неопределено.
-        // Разыменование невалидного итератора неопределено.
         TT const& operator*() const
         {
              return static_cast<vnode<T, TT>*>(itData)->right_data;
         }
-
-        // Переход к следующему по величине left'у.
-        // Инкремент итератора end_left() неопределен.
-        // Инкремент невалидного итератора неопределен.
-
         right_iterator& operator++()
         {
                 itData = getNext_right(itData);
             return (*this);
         }
-
         right_iterator operator++(int)
         {
             right_iterator it2 = (*this);
             ++(*this);
             return it2;
         }
-
         right_iterator& operator=(right_iterator const& rhs)
         {
             itData = rhs.itData;
             return (*this);
         }
-
-
-        // Переход к предыдущему по величине left'у.
-        // Декремент итератора begin_left() неопределен.
-        // Декремент невалидного итератора неопределен.
         right_iterator& operator--()
         {
-                itData = getPrev_right(itData);
+            itData = getPrev_right(itData);
             return (*this);
         }
         right_iterator operator--(int)
@@ -535,16 +405,6 @@ struct bimap
             --(*this);
             return it2;
         }
-        bool equals(right_iterator const& it) const
-        {
-            // std:://cout << itData->isEnd << " " << (it.itData)->isEnd << "\n";
-            return (itData == it.itData);
-        }
-        // left_iterator ссылается на левый элемент некоторой пары.
-        // Эта функция возвращает итератор на правый элемент той же пары.
-        // end_left().flip() возращает end_right().
-        // end_right().flip() возвращает end_left().
-        // flip() невалидного итератора неопределен.
         left_iterator flip() const
         {
             return left_iterator(itData);
@@ -557,63 +417,32 @@ struct bimap
         {
             return lhs.itData != rhs.itData;
         }
-
     };
 
-    // Создает bimap не содержащий ни одной пары.
-    bimap() : data(new BST<T, TT>())
-    {
-    	// data = new BST<T, TT>();
-    }
-
+    bimap() : data(new BST<T, TT>()) {}
     bimap(bimap const&) = delete;
-
     bimap& operator=(bimap const&) = delete;
-
-    // Деструктор. Вызывается при удалении объектов bimap.
-    // Инвалидирует все итераторы ссылающиеся на элементы этого bimap
-    // (включая итераторы ссылающиеся на элементы следующие за последними).
     ~bimap()
     {
-        // std::cout << "DESTRUCTOR\n";
-        // std::cout << (begin_left().equals(end_left())) << "\n";
-        // std::cerr << ""
     	while (begin_left() != end_left())
     	{
     		erase(begin_left());
     	}
         delete data;
-        // erase(end_left());
     }
-
-    // Вставка пары (left, right), возвращает итератор на left.
-    // Если такой left или такой right уже присутствуют в bimap, вставка не
-    // производится и возвращается end_left().
     left_iterator insert(left_t const& left, right_t const& right)
     {
-        // std::cerr << "insert\n";
     	return left_iterator(data->insert(left, right));
     }
-
-    // Удаляет элемент и соответствующий ему парный.
-    // erase невалидного итератора неопределен.
-    // erase(end_left()) и erase(end_right()) неопределены.
-    // Пусть it ссылается на некоторый элемент e.
-    // erase инвалидирует все итераторы ссылающиеся на e и на элемент парный к e.
     void erase(left_iterator it)
     {
-    	// assert(it.itData);
     	data->erase(it.itData);
     }
     void erase(right_iterator it)
     {
-    	assert(it.itData);
     	data->erase(it.itData);
     }
-
-    // Возвращает итератор по элементу. В случае если элемент не найден, возвращает
-    // end_left()/end_right() соответственно.
-    left_iterator  find_left (left_t  const& left)  const
+    left_iterator find_left (left_t const& left) const
     {
         node<T, TT>* ans;
         ans = data->check_left(data->root->left_left, left);
@@ -629,25 +458,17 @@ struct bimap
             ans = data->root;
     	return right_iterator(ans);
     }
-
-    // Возващает итератор на минимальный по величине left.
     left_iterator begin_left() const
     {
-        // std::cout << "HERE\n";
-        // if (!data)
     	node<T, TT>* tmp = data->root;
     	while (tmp->left_left)
     		tmp = tmp->left_left;
-        // std:://cout << "returning begin_left " << tmp->left_data << "\n";
     	return left_iterator(tmp);
     }
     left_iterator end_left() const
     {
-        // std:://cout << "returning end_left " << (data->root)->isEnd << "\n";
     	return left_iterator(data->root);
     }
-
-    // Возващает итератор на минимальный по величине right.
     right_iterator begin_right() const
     {
     	node<T, TT>* tmp = data->root;
@@ -655,7 +476,6 @@ struct bimap
     		tmp = tmp->right_left;
     	return right_iterator(tmp);
     }
-    // Возващает итератор на следующий за последним по величине right.
     right_iterator end_right() const
     {
     	return right_iterator(data->root);
