@@ -37,6 +37,8 @@ struct node
     node() : left_left(nullptr), left_right(nullptr), left_parent(nullptr)
                         , right_left(nullptr), right_right(nullptr), right_parent(nullptr) {}
 
+    virtual ~node() {}
+
     //all are friend
     template<typename S,typename SS>
     friend node<S, SS>* getNext_left(node<S, SS>* cur);
@@ -57,6 +59,7 @@ struct vnode : public node<T, TT>
     left_t  left_data;
     right_t right_data;
     vnode(left_t left, right_t right) : left_data(left), right_data(right) {}
+    ~vnode() {}
 };
 // template<typename T,typename TT>
 // void printTree(node<T, TT>* cur)
@@ -154,7 +157,6 @@ template<typename T, typename TT>
 struct BST
 {
 	node<T, TT>* root;
-
 	typedef T left_t;
     typedef TT right_t;
 
@@ -245,16 +247,17 @@ struct BST
     {
         if (root->left_left == nullptr)
         {
+            // std::cerr << "HERE\n";
             node<T, TT>* it = new vnode<T, TT>(lhs, rhs);
             root->left_left = it;
             root->right_left = it;
             it->left_parent = root;
             it->right_parent = root;
+            // cerr << "INSERT "
             return it;
         }
     	if (check_left(root->left_left, lhs) != nullptr || check_right(root->right_left, rhs) != nullptr)
     		return root;
-        // std::cout << "HERE\n";
     	node<T, TT>* it = new vnode<T, TT>(lhs, rhs);
         // std::cout << "START INSERT\n";
     	root->left_left = insert_left(root->left_left, it);
@@ -349,10 +352,9 @@ struct BST
             else 
                 (val->right_parent)->right_right = nullptr;
         }
-        // std::cerr << "HERE\n";
 		delete val;
     }
-    //DONE
+
     void erase(node<T, TT>* val)
     {
         // cerr << "HERE\n";
@@ -385,7 +387,6 @@ struct bimap
     typedef TT right_t;
 // private:
 	BST<left_t, right_t>* data;
-
 
 // public:
 //     template<bool init_val>
@@ -574,11 +575,11 @@ struct bimap
     // (включая итераторы ссылающиеся на элементы следующие за последними).
     ~bimap()
     {
-        // std:://cout << "DESTRUCTOR\n";
+        // std::cout << "DESTRUCTOR\n";
         // std::cout << (begin_left().equals(end_left())) << "\n";
-    	while (!(begin_left().equals(end_left())))
+        // std::cerr << ""
+    	while (begin_left() != end_left())
     	{
-
     		erase(begin_left());
     	}
         delete data;
@@ -590,6 +591,7 @@ struct bimap
     // производится и возвращается end_left().
     left_iterator insert(left_t const& left, right_t const& right)
     {
+        // std::cerr << "insert\n";
     	return left_iterator(data->insert(left, right));
     }
 
