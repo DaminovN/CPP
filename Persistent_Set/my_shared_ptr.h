@@ -64,7 +64,6 @@ struct my_shared_ptr
 
 	~my_shared_ptr() noexcept
 	{
-		std::cout << "HERE\n";
 		erase();
 	}
 
