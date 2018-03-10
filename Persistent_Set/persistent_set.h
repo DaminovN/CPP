@@ -116,7 +116,10 @@ private:
 	struct base_node
 	{
 		base_node() : left(nullptr), right(nullptr), key(nullptr) {}
-		~base_node() = default;
+		~base_node()
+		{
+			delete key;
+		}
 
 		pointer left;
 		pointer right;
