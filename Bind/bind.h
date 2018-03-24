@@ -1,6 +1,7 @@
 #pragma once
 #include <bits/stdc++.h>
 
+namespace my_bind {
 template<typename T, T ... values>
 struct integer_sequence {};
 
@@ -254,11 +255,13 @@ private:
 template <typename F, typename ... As>
 decltype(auto) bind(F&& f, As&& ... as)
 {
-    return bind_t<F, cleaner_t<std::decay_t<As>&>...>(std::forward<F>(f), std::forward<As>(as)...);
+    return bind_t<std::decay_t<F>, cleaner_t<std::decay_t<As>&>...>(std::forward<F>(f), std::forward<As>(as)...);
 }
 
 template <typename F, typename ... As>
 decltype(auto) call_once_bind(F&& f, As&& ... as)
 {
-    return bind_t<F, cleaner_t<std::decay_t<As>&&>...>(std::forward<F>(f), std::forward<As>(as)...);
+    return bind_t<std::decay_t<F>, cleaner_t<std::decay_t<As>&&>...>(std::forward<F>(f), std::forward<As>(as)...);
+}
+
 }
