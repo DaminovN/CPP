@@ -37,7 +37,6 @@ constexpr placeholder<3> _3;
 template<typename F, typename ... As>
 struct bind_t;
 
-//~~~~~~~~~~~~~~~~~
 template<int N>
 using int_sequence = typename make_integer_sequence<int, N>::type;
 
@@ -68,7 +67,7 @@ struct id<placeholder<N>>
 template <typename F, typename ... As>
 struct id<bind_t<F, As...>>
 {
-	typedef typename id_list<std::decay_t<As>...>::value value;//remove decay
+	typedef typename id_list<std::decay_t<As>...>::value value;
 };
 
 template<typename T, typename ... TAIL>
@@ -85,7 +84,7 @@ struct id_list<>
 
 
 template<typename ... T>
-using id_list_t = typename id_list<std::decay_t<T>...>::value; //remove decay
+using id_list_t = typename id_list<std::decay_t<T>...>::value; 
 
 template<int X, typename Seq>
 struct get_nmb;
@@ -173,7 +172,6 @@ struct bind_cleaner<const bind_t<F, As...>&>
 
 template<typename T>
 using bind_cleaner_t = typename bind_cleaner<T>::value;
-//~~~~~~~~~~~~~~~~~
 
 template<typename A>
 struct G
@@ -256,11 +254,7 @@ private:
 template <typename F, typename ... As>
 decltype(auto) bind(F&& f, As&& ... as)
 {
-    return bind_t<std::decay_t<F>, cleaner_t<std::decay_t<As>&>...>(std::forward<F>(f), std::forward<As>(as)...); // why give F as dacay
+    return bind_t<F, cleaner_t<std::decay_t<As>&>...>(std::forward<F>(f), std::forward<As>(as)...);
 }
 
-template <typename F, typename ... As>
-decltype(auto) call_once_bind(F&& f, As&& ... as)
-{
-    return bind_t<std::decay_t<F>, cleaner_t<std::decay_t<As>&&>...>(std::forward<F>(f), std::forward<As>(as)...); // why give F as dacay
-}
+
