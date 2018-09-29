@@ -11,7 +11,7 @@
 #include <functional>
 #include "storage.h"
 
-template <typename T0, typename ... Ts> struct variant;
+template <typename T0, typename ...Ts> struct variant;
 
 template<size_t I, typename T, bool ok = 1>
 struct variant_alternative;
@@ -34,13 +34,13 @@ struct variant_alternative<I, const volatile T>
     typedef std::add_volatile_t<std::add_const_t<typename variant_alternative<I, T>::type>> type;
 };
 
-template<size_t I, typename T0, typename ... Ts>
+template<size_t I, typename T0, typename ...Ts>
 struct variant_alternative<I, variant<T0, Ts...>, 1>
 {
     typedef typename variant_alternative<I - 1, variant<Ts...>, (I <= sizeof...(Ts))>::type type;
 };
 
-template<typename T0, typename ... Ts>
+template<typename T0, typename ...Ts>
 struct variant_alternative<0, variant<T0, Ts...>>
 {
     typedef T0 type;
@@ -48,7 +48,7 @@ struct variant_alternative<0, variant<T0, Ts...>>
 
 struct empty;
 
-template<size_t I, typename ... Ts>
+template<size_t I, typename ...Ts>
 struct variant_alternative<I, variant<Ts...>, 0>
 {
     typedef empty type;
@@ -83,7 +83,7 @@ template <typename T>
 struct variant_size<const volatile T> : variant_size<T> {};
 
 template <typename T>
-inline constexpr size_t variant_size_v = variant_size<T>::value
+inline constexpr size_t variant_size_v = variant_size<T>::value;
 
 template <typename U, typename ...Ts>
 struct count_type {};
@@ -91,6 +91,11 @@ struct count_type {};
 template <typename U, typename V, typename ...Ts>
 struct count_type<U, V, Ts...> {
 	static constexpr size_t value = std::is_same<U, V>::value + count_type<U, Ts...>::value;
+};
+
+template <typename U, typename V>
+struct count_type<U, V> {
+	static constexpr size_t value = std::is_same<U, V>::value;
 };
 
 template <typename U>
@@ -119,12 +124,12 @@ struct choose_type<T> : single_type<T> {
 };
 
 template <typename U, typename T, typename ...Ts>
-using choose_type_t = decltype(choose_type<T, Ts...>::f(declval<U>()));
+using choose_type_t = decltype(choose_type<T, Ts...>::f(std::declval<U>()));
 
-template <typename U, typename... Ts>
+template <typename U, typename ...Ts>
 struct get_type_id {};
 
-template <typename U, typename T, typename... Ts>
+template <typename U, typename T, typename ...Ts>
 struct get_type_id<U, T, Ts...> {
     static constexpr size_t value = get_type_id<U, Ts...>::value + 1;
 };
@@ -150,21 +155,21 @@ constexpr decltype(auto) get(variant<Ts...>& a) {
 }
 
 template <size_t I, typename ...Ts>
-constexpr decltype(auto) get(const variant<Ts...>& a) {
-	static_assert(I < sizeof...(Ts), "Type index out of range");
-    if (a.get_id() != I){
-        throw bad_variant_access();
-    }
-    return get_storage_value(build_const<I>{}, a.get_storage());
-}
-
-template <size_t I, typename ...Ts>
 constexpr decltype(auto) get(variant<Ts...>&& a) {
 	static_assert(I < sizeof...(Ts), "Type index out of range");
     if (a.get_id() != I){
         throw bad_variant_access();
     }
     return get_storage_value(build_const<I>{}, std::move(a).get_storage());
+}
+
+template <size_t I, typename ...Ts>
+constexpr decltype(auto) get(const variant<Ts...>& a) {
+	static_assert(I < sizeof...(Ts), "Type index out of range");
+    if (a.get_id() != I){
+        throw bad_variant_access();
+    }
+    return get_storage_value(build_const<I>{}, a.get_storage());
 }
 
 template <size_t I, typename ...Ts>
@@ -198,7 +203,7 @@ constexpr decltype(auto) get(const variant<Ts...>&& a) {
 
 template <typename T0, typename ...Ts>
 struct variant : copy_assignable_storage_t<T0, Ts...> {
-private:
+// private:
 	using variant_data = copy_assignable_storage_t<T0, Ts...>;
 	using variant_data::valueless_by_exception_stor;
 	using variant_data::set_id;
@@ -213,7 +218,7 @@ private:
 	static inline constexpr size_t invalid_type_id() {
         return variant_npos;
     }
-public:
+// public:
 	template<typename = std::enable_if_t<std::is_default_constructible_v<T0>>>
     		constexpr variant() noexcept(std::is_nothrow_default_constructible_v<T0>) :variant_data(build_const<0>{}) {}
 
@@ -226,7 +231,7 @@ public:
                   std::is_constructible_v<varT, T>  &&
                   is_unique_v<varT, T0, Ts...> >,
               size_t I = get_type_id<varT, T0, Ts...>::value
-              > constexpr variant(T&& t) noexcept(std::is_nothrow_constructible_v<varT, T>) : data(build_const<I>{}, std::forward<T>(t)) {}
+              > constexpr variant(T&& t) noexcept(std::is_nothrow_constructible_v<varT, T>) : variant_data(build_const<I>{}, std::forward<T>(t)) {}
 
     template <typename T, typename ...Args,
               size_t I = get_type_id<T, T0, Ts...>::value,
@@ -234,20 +239,20 @@ public:
                   (I != invalid_type_id()) &&
                   std::is_constructible_v<T, Args...> &&
                   is_unique_v<T, T0, Ts...> >>
-    constexpr variant(std::in_place_type_t<T> t, Args&&... args) : data(build_const<I>{}, std::forward<Args>(args)...) {}
+    constexpr variant(std::in_place_type_t<T> t, Args&&... args) : variant_data(build_const<I>{}, std::forward<Args>(args)...) {}
 
-    template< std::size_t I, class... Args, typename T = get_type_t<I>
+    template< std::size_t I, class... Args, typename T = get_type_t<I>,
     			typename = std::enable_if_t<
                   (I < sizeof...(Ts) + 1) &&
                   std::is_constructible_v<T, Args...> > >
-	constexpr explicit variant(std::in_place_index_t<I>, Args&&... args) : data(build_const<I>{}, std::forward<Args>(args)...) {}
+	constexpr explicit variant(std::in_place_index_t<I>, Args&&... args) : variant_data(build_const<I>{}, std::forward<Args>(args)...) {}
 
 	variant& operator=(variant const&) = default;
 	variant& operator=(variant&&) = default;
 
 
-	template <typename T, typename... Args, size_t I = get_type_id<T, T0, Ts...>::value,
-		typename = enable_if_t<std::is_constructible_v<T, Args...> && is_unique_v<T, T0, Ts...>>>
+	template <typename T, typename ...Args, size_t I = get_type_id<T, T0, Ts...>::value,
+		typename = std::enable_if_t<std::is_constructible_v<T, Args...> && is_unique_v<T, T0, Ts...>>>
 	T& emplace(Args&&... args) {
 		reset(get_id());
 		implace_constructor(get_id(), std::forward<Args>(args)...);
@@ -260,7 +265,7 @@ public:
     }
 
 	template <typename T, typename varT = choose_type_t<T, T0, Ts...>,
-				typename = enable_if_t<std::is_constructible_v<T, varT> && is_unique_v<varT, T0, Ts...> && std::is_assignable<varT&, T>>, 
+				typename = std::enable_if_t<std::is_constructible_v<T, varT> && is_unique_v<varT, T0, Ts...> && std::is_assignable_v<varT&, T>>, 
 					size_t I = get_type_id<varT, T0, Ts...>::value>
 	variant& operator=(T&& t) noexcept {
 		if (I == get_id()) {
@@ -301,9 +306,9 @@ public:
         if(valueless_by_exception()){
             reset(index());
         }
-        set_id(buf.index());
-        if(!buf.valueless_by_exception()){
-            constructor(index(), std::move(buf));
+        set_id(tmp.index());
+        if(!tmp.valueless_by_exception()){
+            constructor(index(), std::move(tmp));
         }
     }
 };
@@ -319,7 +324,7 @@ constexpr bool holds_alternative(const variant<Types...>& a) noexcept {
 }
 
 template <size_t I, class... Types>
-constexpr decltype(auto) get_if(std::variant<Types...>* pv) noexcept {
+constexpr decltype(auto) get_if(variant<Types...>* pv) noexcept {
 	if (I >= sizeof...(Types)) {
 		throw bad_variant_access();
 	}
@@ -330,7 +335,7 @@ constexpr decltype(auto) get_if(std::variant<Types...>* pv) noexcept {
 }
 
 template <size_t I, class... Types>
-constexpr decltype(auto) get_if(const std::variant<Types...>* pv) noexcept {
+constexpr decltype(auto) get_if(const variant<Types...>* pv) noexcept {
 	if (I >= sizeof...(Types)) {
 		throw bad_variant_access();
 	}
@@ -340,16 +345,217 @@ constexpr decltype(auto) get_if(const std::variant<Types...>* pv) noexcept {
 	return nullptr;
 }
 
-template <typename T, class... Types, typename = enable_if_t<is_unique_v<T, Types...>>>
-constexpr decltype(auto) get_if(std::variant<Types...>* pv) noexcept {
-	constexpr size_t I = get_type_id<T, Types...>;
+template <typename T, class... Types, typename = std::enable_if_t<is_unique_v<T, Types...>>>
+constexpr decltype(auto) get_if(variant<Types...>* pv) noexcept {
+	constexpr size_t I = get_type_id<T, Types...>();
 	return get_if<I>(pv);
 }
 
-template <typename T, class... Types, typename = enable_if_t<is_unique_v<T, Types...>>>
-constexpr decltype(auto) get_if(const std::variant<Types...>* pv) noexcept {
-	constexpr size_t I = get_type_id<T, Types...>;
+template <typename T, class... Types, typename = std::enable_if_t<is_unique_v<T, Types...>>>
+constexpr decltype(auto) get_if(const variant<Types...>* pv) noexcept {
+	constexpr size_t I = get_type_id<T, Types...>();
 	return get_if<I>(pv);
+}
+
+template<typename T, size_t ...dimensions>
+struct multi_array {
+    constexpr const T& access() const {
+        return data;
+    }
+    T data;
+};
+
+template<typename T, size_t first, size_t ...rest>
+struct multi_array<T, first, rest...> {
+    template<typename ...Args>
+    constexpr const T& access(size_t first_index, Args... rest_indices) const {
+        return arr[first_index].access(rest_indices...);
+    }
+
+    multi_array<T, rest...> arr[first];
+};
+
+template<typename array_type, typename variant_tuple, typename index_seq>
+struct gen_vtable_impl;
+
+template<size_t N, typename ...Types>
+struct nth_type;
+
+template<size_t N, typename first, typename ...rest>
+struct nth_type<N, first, rest...>: nth_type<N - 1, rest...> {};
+
+template<typename first, typename ...rest>
+struct nth_type<0, first, rest...>
+{
+    using type = first;
+};
+
+template<typename result_type, typename visitor, size_t ...dimensions, typename ...variants, size_t ...indices>
+struct gen_vtable_impl<multi_array<result_type (*)(visitor, variants...), dimensions...>,
+			std::tuple<variants...>, std::index_sequence<indices...>> {
+
+    using next = std::remove_reference_t<typename nth_type<sizeof...(indices),variants...>::type>;
+    using array_type = multi_array<result_type (*)(visitor, variants...), dimensions...>;
+
+    static constexpr array_type apply() {
+        array_type vtable{};
+        apply_all(vtable, std::make_index_sequence<variant_size_v<next>>());
+        return vtable;
+    }
+
+    template<size_t ...var_indices>
+    static constexpr void apply_all(array_type& vtable, std::index_sequence<var_indices...>) {
+        (apply_single<var_indices>(vtable.arr[var_indices]), ...);
+    }
+
+    template<size_t index, typename T>
+    static constexpr void apply_single(T& element) {
+        element = gen_vtable_impl<
+                std::remove_reference_t<decltype(element)>,
+                std::tuple<variants...>,
+                std::index_sequence<indices..., index>>::apply();
+    }
+};
+
+template<typename result_type, typename visitor, typename ...variants, size_t ...indices>
+struct gen_vtable_impl<
+        multi_array<result_type (*)(visitor, variants...)>, std::tuple<variants...>, std::index_sequence<indices...>> {
+
+    using array_type = multi_array<result_type (*)(visitor&&, variants...)>;
+
+    decltype(auto) static constexpr visit_invoke(visitor&& vis, variants... vars) {
+        return std::invoke(std::forward<visitor>(vis), get<indices>(std::forward<variants>(vars))...);
+    }
+    static constexpr auto apply() {
+        return array_type{&visit_invoke};
+    }
+};
+
+template<typename result_type, typename visitor, typename ...variants>
+struct gen_vtable {
+    using func_ptr = result_type (*)(visitor&&, variants...);
+    using array_type = multi_array<func_ptr, variant_size_v<std::remove_reference_t<variants>>...>;
+
+    static constexpr array_type apply() {
+        return gen_vtable_impl<array_type, std::tuple<variants...>, std::index_sequence<>>::apply();
+    }
+
+    static constexpr auto vtable = apply();
+};
+
+
+template<typename Visitor, typename ...Variants>
+constexpr decltype(auto) visit(Visitor&& visitor, Variants&& ... variants) {
+    if ((variants.valueless_by_exception() || ...))
+    {
+        throw bad_variant_access();
+    }
+
+    using result_type = decltype(std::forward<Visitor>(visitor)(get<0>(std::forward<Variants>(variants))...));
+
+    constexpr auto& v_table = gen_vtable<result_type, Visitor&&, Variants&&...>::vtable;
+    auto func_ptr = v_table.access(variants.index()...);
+
+    return (*func_ptr)(std::forward<Visitor>(visitor), std::forward<Variants>(variants)...);
+}
+
+auto comparator = [](auto&& action) constexpr {
+    return ([action](auto&& a, auto&& b) constexpr -> bool  {
+        if constexpr(std::is_same_v<decltype(a), decltype(b)>) {
+            return action(a, b);
+        } else {
+            return 0;
+        }
+    });
+};
+
+auto less = comparator([](auto&& x, auto&& y) constexpr -> bool  {return x < y; });
+auto greater = comparator([](auto&& x, auto&& y) constexpr -> bool  {return x > y; });
+auto equal = comparator([](auto&& x, auto&& y) constexpr -> bool  {return x == y; });
+auto neq = comparator([](auto&& x, auto&& y) constexpr -> bool  {return x != y; });
+auto leq = comparator([](auto&& x, auto&& y) constexpr -> bool  {return x <= y;});
+auto geq = comparator([](auto&& x, auto&& y) constexpr -> bool  {return x >= y;});
+
+template <typename ...Ts>
+constexpr bool operator==(const variant<Ts...>& a, const variant<Ts...>& b) {
+    if (a.index() != b.index()) {
+        return false;
+    }
+    if (a.valueless_by_exception()) {
+        return true;
+    }
+    return visit(equal, a, b);
+}
+
+template <typename ...Ts>
+constexpr bool operator!=(const variant<Ts...>& a, const variant<Ts...>& b) {
+    if (a.index() != b.index()) {
+        return true;
+    }
+    if (a.valueless_by_exception()) {
+        return false;
+    }
+    return visit(neq, a, b);
+}
+
+template <typename ...Ts>
+constexpr bool operator<(const variant<Ts...>& a, const variant<Ts...>& b) {
+    if (b.valueless_by_exception()) {
+        return false;
+    }
+    if (a.valueless_by_exception()) {
+        return true;
+    }
+    if (a.index() == b.index()) {
+        return visit(less, a, b);
+    } else {
+        return a.index() < b.index();
+    }
+}
+
+template <typename ...Ts>
+constexpr bool operator>(const variant<Ts...>& a, const variant<Ts...>& b) {
+    if (a.valueless_by_exception()) {
+        return false;
+    }
+    if (b.valueless_by_exception()) {
+        return true;
+    }
+    if (a.index() == b.index()) {
+        return visit(greater, a, b);
+    } else {
+        return a.index() > b.index();
+    }
+}
+
+template <typename ...Ts>
+constexpr bool operator<=(const variant<Ts...>& a, const variant<Ts...>& b) {
+    if (a.valueless_by_exception()) {
+        return true;
+    }
+    if (b.valueless_by_exception()) {
+        return false;
+    }
+    if (a.index() == b.index()) {
+        return  visit(leq, a, b);
+    } else {
+        return a.index() < b.index();
+    }
+}
+
+template <typename ...Ts>
+constexpr bool operator>=(const variant<Ts...>& a, const variant<Ts...>& b) {
+    if (b.valueless_by_exception()) {
+        return true;
+    }
+    if (a.valueless_by_exception()) {
+        return false;
+    }
+    if (a.index() == b.index()) {
+        return visit(geq, a, b);
+    } else {
+        return a.index() < b.index();
+    }
 }
 
 #endif //VARIANT_H

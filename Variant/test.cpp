@@ -1,13 +1,37 @@
-#include <bits/stdc++.h>
-#include <variant>
+#include <iostream>
+#include <vector>
+#include <string>
+#include "variant.h"
+using std::vector;
+using std::string;
+using std::cin;
+using std::cout;
+using std::endl;
+using std::in_place_index_t;
+using std::in_place_type_t;
+using std::move;
 
-using namespace std;
+int main() {
+	string a = "absss";
+	variant<int, double, string> t(a);
+	variant<int, double, string> tt(3.22);
 
-int main()
-{
-	variant<string, bool> x("abc");
+	// get<1>(	tt);
 
-	cout << holds_alternative<bool>(x) << "\n";
+	cout << (t < tt) << endl;
+
+	visit([](auto&& a, auto&& b) { cout << a << " " << b <<  endl; }, t, tt);
+
+	auto w = visit([](auto&& arg)->variant<int, double, string> { return arg + arg; }, t);
+	auto ww = visit([](auto&& arg)->variant<int, double, string> { return arg + arg; }, tt);
+
+	visit([](auto&& a, auto&& b) { cout << a << " " << b << endl; }, w, ww);
+
+	cout << (tt < ww) << endl;
+
+	variant<int, double, string> q;
+	q = t;
+	get<string>(t) = "kekek";
 
 	return 0;
 }

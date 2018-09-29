@@ -29,7 +29,7 @@ struct storage {
     template <typename ... Args>
     void implace_constructor(size_t id, Args&& ... args);
 
-    void clear(size_t)
+    void reset(size_t)
     {}
 };
 
@@ -68,11 +68,11 @@ struct storage<1, T0, Ts...> {
         }
     }
 
-    void clear(size_t id) noexcept {
+    void reset(size_t id) noexcept {
         if (id == 0) {
             head.~T0();
         } else {
-            tail.clear(id - 1);
+            tail.reset(id - 1);
         }
     }
 };
@@ -112,11 +112,11 @@ struct storage<0, T0, Ts...> {
         }
     }
 
-    void clear(size_t id) noexcept {
+    void reset(size_t id) noexcept {
         if (id == 0) {
             head.~T0();
         } else {
-            tail.clear(id - 1);
+            tail.reset(id - 1);
         }
     }
     ~storage() noexcept {};
@@ -127,13 +127,10 @@ constexpr decltype(auto) get_storage_value(build_const<0>, S&& s) {
     return (std::forward<S>(s).head);
 }
 
-template <typename S>
+template <typename S, size_t I>
 constexpr decltype(auto) get_storage_value(build_const<I>, S&& s) {
     return get_storage_value(build_const<I - 1>{}, std::forward<S>(s).tail);
 }
-
-template <>
-void swap_value(size_t id, storage_t<>& a, storage_t<>& b) {}
 
 template <typename ...Ts>
 void swap_value(size_t id, storage_t<Ts...>& a, storage_t<Ts...>& b) {
@@ -143,6 +140,9 @@ void swap_value(size_t id, storage_t<Ts...>& a, storage_t<Ts...>& b) {
         swap_value(id - 1, a.tail, b.tail);
     }
 }
+
+template <>
+void swap_value(size_t id, storage_t<>& a, storage_t<>& b) {}
 
 template <bool is_trivially_destructible, typename ...Ts>
 struct destroyable_storage : storage_t<Ts...> {
@@ -161,7 +161,7 @@ struct destroyable_storage : storage_t<Ts...> {
     constexpr size_t get_id() const noexcept {
         return id;
     }
-    constexpr bool valueless_by_exception() const noexcept {
+    constexpr bool valueless_by_exception_stor() const noexcept {
         return (get_id() == variant_npos);
     }
     constexpr base& get_storage() & noexcept {
@@ -180,25 +180,32 @@ struct destroyable_storage : storage_t<Ts...> {
 
 template <typename ...Ts>
 struct destroyable_storage<false, Ts...> : destroyable_storage<true, Ts...> {
-    using destroyable_storage<true, Ts...>::destroyable_storage;
+	
+	using destroyable_storage<true, Ts...>::destroyable_storage;
     using destroyable_storage<true, Ts...>::operator=;
-    using destroyable_storage<true, Ts...>::id;
-    using destroyable_storage<true, Ts...>::set_id;
-    using destroyable_storage<true, Ts...>::get_id;
-    using destroyable_storage<true, Ts...>::valueless_by_exception;
+
     using destroyable_storage<true, Ts...>::get_storage;
+    using destroyable_storage<true, Ts...>::get_id;
+    using destroyable_storage<true, Ts...>::valueless_by_exception_stor;
+    using destroyable_storage<true, Ts...>::set_id;
     using destroyable_storage<true, Ts...>::base;
+    using destroyable_storage<true, Ts...>::id;
     using destroyable_storage<true, Ts...>::reset;
 
+
+	destroyable_storage() = default;
+	destroyable_storage(destroyable_storage const&) = default;
+	destroyable_storage(destroyable_storage&&) = default;
+
     ~destroyable_storage() noexcept {
-        if (!valueless_by_exception()) {
-            reset(id);
+        if (!valueless_by_exception_stor()) {
+            reset(get_id());
         }
     }
 };
 
 template <typename ...Ts>
-using destroyable_storage_t<Ts...> = destroyable_storage<std::conjunction_v<std::is_trivially_destructible<Ts>...>, Ts...>;
+using destroyable_storage_t = destroyable_storage<std::conjunction_v<std::is_trivially_destructible<Ts>...>, Ts...>;
 
 template <bool is_move_constructible, typename ...Ts>
 struct moveable_storage : destroyable_storage_t<Ts...> {
@@ -208,7 +215,7 @@ struct moveable_storage : destroyable_storage_t<Ts...> {
 	moveable_storage(const moveable_storage& other) = default;
 	moveable_storage(moveable_storage&& other) {
 		movable_base::id = other.id;
-		if (!movable_base::valueless_by_exception()) {
+		if (!movable_base::valueless_by_exception_stor()) {
 			movable_base::constructor(movable_base::id, std::move(other));
 		}
 	}
@@ -223,7 +230,7 @@ struct moveable_storage<false, Ts...> : moveable_storage<true, Ts...> {
 };
 
 template <typename ...Ts>
-using moveable_storage_t<Ts...> = moveable_storage<std::conjunction_v<std::is_move_constructible<Ts>...>, Ts...>;
+using moveable_storage_t = moveable_storage<std::conjunction_v<std::is_move_constructible<Ts>...>, Ts...>;
 
 template <bool is_copy_constructible, typename ...Ts>
 struct copyable_storage : moveable_storage_t<Ts...> {
@@ -232,12 +239,12 @@ struct copyable_storage : moveable_storage_t<Ts...> {
 
 	copyable_storage(const copyable_storage& other) {
 		copyable_base::id = other.id;
-		if (!copyable_base::valueless_by_exception()) {
+		if (!copyable_base::valueless_by_exception_stor()) {
 			copyable_base::constructor(copyable_base::id, other);
 		}
 	}
 
-	moveable_storage(moveable_storage&& other) = default;
+	copyable_storage(copyable_storage&& other) = default;
 };
 
 template <typename ...Ts>
@@ -249,7 +256,7 @@ struct copyable_storage<false, Ts...> : copyable_storage<true, Ts...> {
 };
 
 template <typename ...Ts>
-using copyable_storage_t<Ts...> = copyable_storage<std::conjunction_v<std::is_copy_constructible<Ts>...>, Ts...>;
+using copyable_storage_t = copyable_storage<std::conjunction_v<std::is_copy_constructible<Ts>...>, Ts...>;
 
 template <bool is_move_assignable, typename ...Ts>
 struct move_assignable_storage : copyable_storage_t<Ts...> {
@@ -262,9 +269,9 @@ struct move_assignable_storage : copyable_storage_t<Ts...> {
 	move_assignable_storage& operator=(const move_assignable_storage&) = default;
 
 	move_assignable_storage& operator=(move_assignable_storage&& other) {
-		if (move_assignable_base::valueless_by_exception() && other.valueless_by_exception()) {
+		if (move_assignable_base::valueless_by_exception_stor() && other.valueless_by_exception_stor()) {
 			return *this;
-		} else if(!(move_assignable_base::valueless_by_exception()) && other.valueless_by_exception()) {
+		} else if(!(move_assignable_base::valueless_by_exception_stor()) && other.valueless_by_exception_stor()) {
 			move_assignable_base::reset(move_assignable_base::get_id());
 			move_assignable_base::id = variant_npos;
 			return *this;
@@ -293,17 +300,17 @@ struct move_assignable_storage<false, Ts...> : move_assignable_storage<true, Ts.
 };
 
 template <typename ...Ts>
-using move_assignable_storage_t<Ts...> = move_assignable_storage<std::conjunction_v<std::is_move_assignable<Ts>...>, Ts...>;
+using move_assignable_storage_t = move_assignable_storage<std::conjunction_v<std::is_move_assignable<Ts>...>, Ts...>;
 
 template <bool is_copy_assignable, typename ...Ts>
 struct copy_assignable_storage : move_assignable_storage_t<Ts...> {
 	using copy_assignable_base = move_assignable_storage_t<Ts...>;
 	using copy_assignable_base::copy_assignable_base;
 
-	move_assignable_storage& operator=(const move_assignable_storage& other) {
-		if (copy_assignable_base::valueless_by_exception() && other.valueless_by_exception()) {
+	copy_assignable_storage& operator=(const copy_assignable_storage& other) {
+		if (copy_assignable_base::valueless_by_exception_stor() && other.valueless_by_exception_stor()) {
 			return *this;
-		} else if(!(copy_assignable_base::valueless_by_exception()) && other.valueless_by_exception()) {
+		} else if(!(copy_assignable_base::valueless_by_exception_stor()) && other.valueless_by_exception_stor()) {
 			copy_assignable_base::reset(copy_assignable_base::get_id());
 			copy_assignable_base::id = variant_npos;
 			return *this;
@@ -333,6 +340,6 @@ struct copy_assignable_storage<false, Ts...> : copy_assignable_storage<true, Ts.
 };
 
 template <typename ...Ts>
-using copy_assignable_storage_t<Ts...> = copy_assignable_storage<std::conjunction_v<std::is_copy_assignable<Ts>...>, Ts...>;
+using copy_assignable_storage_t = copy_assignable_storage<std::conjunction_v<std::is_copy_assignable<Ts>...>, Ts...>;
 
 #endif //VARIANT_STORAGE_H
