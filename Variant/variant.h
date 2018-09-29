@@ -148,7 +148,7 @@ class bad_variant_access : public std::exception {};
 template <size_t I, typename ...Ts>
 constexpr decltype(auto) get(variant<Ts...>& a) {
 	static_assert(I < sizeof...(Ts), "Type index out of range");
-    if (a.get_id() != I){
+    if (a.index() != I){
         throw bad_variant_access();
     }
     return get_storage_value(build_const<I>{}, a.get_storage());
@@ -157,7 +157,7 @@ constexpr decltype(auto) get(variant<Ts...>& a) {
 template <size_t I, typename ...Ts>
 constexpr decltype(auto) get(variant<Ts...>&& a) {
 	static_assert(I < sizeof...(Ts), "Type index out of range");
-    if (a.get_id() != I){
+    if (a.index() != I){
         throw bad_variant_access();
     }
     return get_storage_value(build_const<I>{}, std::move(a).get_storage());
@@ -166,7 +166,7 @@ constexpr decltype(auto) get(variant<Ts...>&& a) {
 template <size_t I, typename ...Ts>
 constexpr decltype(auto) get(const variant<Ts...>& a) {
 	static_assert(I < sizeof...(Ts), "Type index out of range");
-    if (a.get_id() != I){
+    if (a.index() != I){
         throw bad_variant_access();
     }
     return get_storage_value(build_const<I>{}, a.get_storage());
@@ -175,7 +175,7 @@ constexpr decltype(auto) get(const variant<Ts...>& a) {
 template <size_t I, typename ...Ts>
 constexpr decltype(auto) get(const variant<Ts...>&& a) {
 	static_assert(I < sizeof...(Ts), "Type index out of range");
-    if (a.get_id() != I){
+    if (a.index() != I){
         throw bad_variant_access();
     }
     return get_storage_value(build_const<I>{}, std::move(a).get_storage());
@@ -203,7 +203,7 @@ constexpr decltype(auto) get(const variant<Ts...>&& a) {
 
 template <typename T0, typename ...Ts>
 struct variant : copy_assignable_storage_t<T0, Ts...> {
-// private:
+private:
 	using variant_data = copy_assignable_storage_t<T0, Ts...>;
 	using variant_data::valueless_by_exception_stor;
 	using variant_data::set_id;
@@ -218,7 +218,7 @@ struct variant : copy_assignable_storage_t<T0, Ts...> {
 	static inline constexpr size_t invalid_type_id() {
         return variant_npos;
     }
-// public:
+public:
 	template<typename = std::enable_if_t<std::is_default_constructible_v<T0>>>
     		constexpr variant() noexcept(std::is_nothrow_default_constructible_v<T0>) :variant_data(build_const<0>{}) {}
 

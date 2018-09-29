@@ -16,8 +16,6 @@ int main() {
 	variant<int, double, string> t(a);
 	variant<int, double, string> tt(3.22);
 
-	// get<1>(	tt);
-
 	cout << (t < tt) << endl;
 
 	visit([](auto&& a, auto&& b) { cout << a << " " << b <<  endl; }, t, tt);
@@ -32,6 +30,5 @@ int main() {
 	variant<int, double, string> q;
 	q = t;
 	get<string>(t) = "kekek";
-
 	return 0;
 }

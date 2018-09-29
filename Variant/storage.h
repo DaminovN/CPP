@@ -146,7 +146,7 @@ void swap_value(size_t id, storage_t<>& a, storage_t<>& b) {}
 
 template <bool is_trivially_destructible, typename ...Ts>
 struct destroyable_storage : storage_t<Ts...> {
-    size_t id;
+    size_t id = 0;
     using base = storage_t<Ts...>;
     using base::base;
     destroyable_storage() = default;
